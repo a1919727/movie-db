@@ -1,0 +1,59 @@
+import Link from "next/link";
+import { Search, User } from "lucide-react";
+import { Pacifico } from "next/font/google";
+import { Button } from "../ui/button";
+
+const pacifico = Pacifico({
+  subsets: ["latin"],
+  weight: "400",
+});
+
+const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Movies", href: "/movies" },
+  { label: "Favorites", href: "/favorites" },
+];
+
+export function Header() {
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur">
+      <div className="mx-auto grid h-16 max-w-7xl grid-cols-3 items-center px-2">
+        {/* Logo */}
+        <Link href="/" className={`${pacifico.className} text-2xl`}>
+          Movie.ai
+        </Link>
+
+        {/* Search */}
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search movies..."
+              className="h-10 w-full rounded-full border bg-background pl-10 pr-4 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Navigation & Avatar */}
+        <div className="flex items-center justify-end gap-6">
+          <nav className="hidden items-center gap-6 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-base font-medium text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <Button className="h-9 w-9 rounded-full border border-[#e4d9d7]">
+            <User className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
