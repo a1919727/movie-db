@@ -9,8 +9,8 @@ const pacifico = Pacifico({
 
 export function Footer() {
   return (
-    <footer className="w-full border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto grid max-w-7xl grid-cols-5 px-2 mb-4">
+    <footer className="border-t border-white/10 bg-zinc-950">
+      <div className="mx-auto grid max-w-7xl grid-cols-5 px-2 mb-4 py-4">
         {/* Left */}
         <div className="col-span-2">
           <Link href="/" className={`${pacifico.className} text-2xl`}>
@@ -73,6 +73,9 @@ export function Footer() {
             </ul>
           </div>
         </div>
+      </div>
+      <div className="text-center text-sm text-muted-foreground py-4">
+        © 2026 Movie.ai. All rights reserved.
       </div>
     </footer>
   );
