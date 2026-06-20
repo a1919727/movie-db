@@ -30,7 +30,7 @@ export function MovieSelector({
       <SelectTrigger className="w-full max-w-48">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align="start" position="popper">
         <SelectGroup>
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
