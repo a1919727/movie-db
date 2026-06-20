@@ -1,6 +1,6 @@
 import type { Movies } from "@/types/movie";
 import Link from "next/link";
-import { MovieCard } from "./movie-card";
+import { MovieCard } from "../movies/movie-card";
 
 const movies: Movies[] = [
   {

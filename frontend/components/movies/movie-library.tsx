@@ -1,5 +1,5 @@
 import type { Movies } from "@/types/movie";
-import { MovieCard } from "../home/movie-card";
+import { MovieCard } from "./movie-card";
 
 const defaultMovies: Movies[] = [
   {
