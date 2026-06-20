@@ -100,7 +100,7 @@ export function HeroSection() {
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <Carousel className="w-full">
         <CarouselContent>
-          {popularMovies.map((movie, index) => (
+          {popularMovies.map((movie) => (
             <CarouselItem key={movie.id}>
               <div
                 className="relative overflow-hidden rounded-[32px] min-h-[560px] bg-cover bg-center bg-no-repeat"
