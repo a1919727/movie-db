@@ -1,4 +1,4 @@
-import type { Movies } from "@/types/movie";
+import type { Movies, MovieDetail } from "@/types/movie";
 
 export const movies: Movies[] = [
   {
@@ -56,5 +56,28 @@ export const movies: Movies[] = [
     year: 2025,
     rating: 4.8,
     posterUrl: "",
+  },
+];
+
+export const movieDetails: MovieDetail[] = [
+  {
+    id: 1,
+    title: "Avatar",
+    year: 2025,
+    rating: 4.8,
+    posterUrl: "",
+    description:
+      "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home. ...",
+    geners: ["Drama", "Action"],
+  },
+  {
+    id: 2,
+    title: "Avatar",
+    year: 2025,
+    rating: 4.8,
+    posterUrl: "",
+    description:
+      "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home. ...",
+    geners: ["Drama", "Action"],
   },
 ];

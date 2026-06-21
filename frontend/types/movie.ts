@@ -14,3 +14,13 @@ export type Movies = {
   rating: number;
   posterUrl: string;
 };
+
+export type MovieDetail = {
+  id: number;
+  title: string;
+  year: number;
+  rating: number;
+  posterUrl: string;
+  description: string;
+  geners: string[];
+};
