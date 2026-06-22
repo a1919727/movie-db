@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-export function MovieReviews() {
+export function MovieReviewForm() {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <div className="max-w-6xl">

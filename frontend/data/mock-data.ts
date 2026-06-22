@@ -1,4 +1,9 @@
-import type { Movies, MovieDetail, MovieInformation } from "@/types/movie";
+import type {
+  Movies,
+  MovieDetail,
+  MovieInformation,
+  UserReview,
+} from "@/types/movie";
 
 export const movies: Movies[] = [
   {
@@ -100,5 +105,22 @@ export const movieInfor: MovieInformation[] = [
     director: "Ryan Condal",
     runtime: "50m",
     actors: ["Sam Worthington", "Zoe Saldaña"],
+  },
+];
+
+export const userReview: UserReview[] = [
+  {
+    id: 1,
+    avatar: "",
+    name: "Judy",
+    createdAt: "2026-06-22T08:00:00.000Z",
+    review: "I wish season three would come out sooner",
+  },
+  {
+    id: 2,
+    avatar: "",
+    createdAt: "2026-06-22T07:00:00.000Z",
+    name: "Lili",
+    review: "I wish season three would come out sooner",
   },
 ];

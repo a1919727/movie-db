@@ -34,3 +34,11 @@ export type MovieInformation = {
   runtime: string;
   actors: string[];
 };
+
+export type UserReview = {
+  id: number;
+  avatar: string;
+  name: string;
+  createdAt: string;
+  review: string;
+};
