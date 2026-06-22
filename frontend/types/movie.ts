@@ -24,3 +24,13 @@ export type MovieDetail = {
   description: string;
   geners: string[];
 };
+
+export type MovieInformation = {
+  id: number;
+  country: string;
+  releaseDate: string;
+  language: string;
+  director: string;
+  runtime: string;
+  actors: string[];
+};

@@ -1,4 +1,4 @@
-import type { Movies, MovieDetail } from "@/types/movie";
+import type { Movies, MovieDetail, MovieInformation } from "@/types/movie";
 
 export const movies: Movies[] = [
   {
@@ -79,5 +79,26 @@ export const movieDetails: MovieDetail[] = [
     description:
       "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home. ...",
     geners: ["Drama", "Action"],
+  },
+];
+
+export const movieInfor: MovieInformation[] = [
+  {
+    id: 1,
+    country: "United States",
+    releaseDate: "August 21, 2009",
+    language: "English",
+    director: "Ryan Condal",
+    runtime: "50m",
+    actors: ["Sam Worthington", "Zoe Saldaña"],
+  },
+  {
+    id: 2,
+    country: "United States",
+    releaseDate: "August 21, 2009",
+    language: "English",
+    director: "Ryan Condal",
+    runtime: "50m",
+    actors: ["Sam Worthington", "Zoe Saldaña"],
   },
 ];
