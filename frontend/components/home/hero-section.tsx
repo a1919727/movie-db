@@ -103,8 +103,12 @@ export function HeroSection() {
           {popularMovies.map((movie) => (
             <CarouselItem key={movie.id}>
               <div
-                className="relative overflow-hidden rounded-[32px] min-h-[560px] bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: `url(${movie.posterUrl})` }}
+                className="relative min-h-[560px] overflow-hidden rounded-[32px] bg-zinc-900 bg-cover bg-center bg-no-repeat"
+                style={
+                  movie.posterUrl
+                    ? { backgroundImage: `url(${movie.posterUrl})` }
+                    : undefined
+                }
               >
                 <div className="relative flex min-h-[560px] flex-col justify-center p-6 md:p-10">
                   <div className="max-w-3xl space-y-5">

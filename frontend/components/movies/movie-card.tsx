@@ -8,14 +8,24 @@ type MovieCardProps = {
 };
 
 export function MovieCard({ movie }: MovieCardProps) {
+  const hasPoster = movie.posterUrl.trim().length > 0;
+
   return (
     <Card className="group overflow-hidden border-white/10 bg-zinc-950 text-white transition hover:-translate-y-1 hover:border-white/20">
-      <div className="aspect-[4/5] overflow-hidden">
-        <Image
-          src={movie.posterUrl}
-          alt={movie.title}
-          className="h-full w-full object-cover"
-        />
+      <div className="aspect-[4/5] overflow-hidden bg-zinc-900">
+        {hasPoster ? (
+          <Image
+            src={movie.posterUrl}
+            alt={movie.title}
+            width={400}
+            height={500}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">
+            No poster
+          </div>
+        )}
       </div>
 
       <CardContent className="space-y-4 p-4">
