@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+// generator client {
+//   provider = "prisma-client"
+//   output   = "../src/generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+// }
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  name       String
+  email      String     @unique
+  avatarUrl  String?
+  reviews    Review[]
+  favorites  Favorite[]
+  watched    WatchedMovie[]
+  createdAt  DateTime   @default(now())
+}
+
+model Movie {
+  id          Int            @id @default(autoincrement())
+  title       String
+  year        Int?
+  rating      Float?
+  posterUrl   String?
+  description String?
+  genres      MovieGenre[]
+  reviews     Review[]
+  favorites   Favorite[]
+  watchedBy   WatchedMovie[]
+}
+
+model MovieGenre {
+  id      Int    @id @default(autoincrement())
+  genre   String
+  movieId Int
+  movie   Movie  @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  userId    Int
+  movieId   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId    Int
+  movieId   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+}
+
+model WatchedMovie {
+  id        Int      @id @default(autoincrement())
+  watchedAt DateTime @default(now())
+
+  userId    Int
+  movieId   Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, movieId])
+}
