@@ -41,7 +41,6 @@ model Movie {
   posterUrl   String?
   description String?
   genres      MovieGenre[]
-  reviews     Review[]
   favorites   Favorite[]
   watchedBy   WatchedMovie[]
 }
@@ -59,9 +58,8 @@ model Review {
   createdAt DateTime @default(now())
 
   userId    Int
-  movieId   Int
+  tmdbMovieId Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
 }
 
 model Favorite {
