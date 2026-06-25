@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Search, User } from "lucide-react";
+import { Search } from "lucide-react";
 import { Pacifico } from "next/font/google";
-import { Button } from "../ui/button";
+import { AuthControls } from "../auth/auth-controls";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -49,9 +49,7 @@ export function Header() {
             ))}
           </nav>
 
-          <Button className="h-9 w-9 rounded-full border border-[#e4d9d7]">
-            <User className="h-4 w-4" />
-          </Button>
+          <AuthControls />
         </div>
       </div>
     </header>
