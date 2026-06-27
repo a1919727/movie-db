@@ -5,6 +5,7 @@ export type HeroMovie = {
   rating: number;
   description: string;
   posterUrl: string;
+  backdropUrl: string;
 };
 
 export type Movies = {

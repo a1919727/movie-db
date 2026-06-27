@@ -11,96 +11,15 @@ import {
 import type { HeroMovie } from "@/types/movie";
 import { Button } from "../ui/button";
 
-const popularMovies: HeroMovie[] = [
-  {
-    id: 1,
-    title: "Movie 1",
-    year: 2024,
-    rating: 8.7,
-    description:
-      "2009-yilda Pixar tomonidan suratga olingan animatsion film. Keksaygan Karl Frederiksen uyini minglab sharlar yordamida Janubiy Amerikaga uchiradi va tasodifan yosh sarguzashtchi bilan sayohat qiladi.",
-    posterUrl: "",
-  },
-  {
-    id: 2,
-    title: "Movie 2",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 3,
-    title: "Movie 3",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 4,
-    title: "Movie 4",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 5,
-    title: "Movie 5",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 6,
-    title: "Movie 6",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 7,
-    title: "Movie 7",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 8,
-    title: "Movie 8",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 9,
-    title: "Movie 9",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-  {
-    id: 10,
-    title: "Movie 10",
-    year: 2024,
-    rating: 8.7,
-    description: "This movie....",
-    posterUrl: "",
-  },
-];
-
-export function HeroSection() {
+type HeroSectionProps = {
+  movies: HeroMovie[];
+};
+export function HeroSection({ movies }: HeroSectionProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <Carousel className="w-full">
         <CarouselContent>
-          {popularMovies.map((movie) => (
+          {movies.map((movie) => (
             <CarouselItem key={movie.id}>
               <div
                 className="relative min-h-[560px] overflow-hidden rounded-[32px] bg-zinc-900 bg-cover bg-center bg-no-repeat"

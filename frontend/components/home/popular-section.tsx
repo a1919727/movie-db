@@ -1,8 +1,12 @@
 import Link from "next/link";
-import { movies } from "@/data/mock-data";
+import type { Movies } from "@/types/movie";
 import { MovieCard } from "../movies/movie-card";
 
-export function PopularSection() {
+type PopularSectionProps = {
+  movies: Movies[];
+};
+
+export function PopularSection({ movies }: PopularSectionProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8 mb-6">
       <div className="flex justify-between">

@@ -1,0 +1,69 @@
+import type { HeroMovie } from "@/types/movie";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if (!API_BASE_URL) {
+  throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
+}
+
+type TmdbMovie = {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  release_date: string;
+  vote_average: number;
+};
+
+type TmdbMovieListResponse = {
+  page: number;
+  results: TmdbMovie[];
+  total_pages: number;
+  total_results: number;
+};
+
+type MoviesResponse = {
+  page: number;
+  results: HeroMovie[];
+  total_pages: number;
+  total_results: number;
+};
+
+const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
+const TMDB_BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
+
+function mapTmdbMovie(movie: TmdbMovie): HeroMovie {
+  return {
+    id: movie.id,
+    title: movie.title,
+    year: Number(movie.release_date.slice(0, 4)),
+    rating: movie.vote_average,
+    posterUrl: movie.poster_path
+      ? `${TMDB_POSTER_BASE_URL}${movie.poster_path}`
+      : "",
+    backdropUrl: movie.backdrop_path
+      ? `${TMDB_BACKDROP_BASE_URL}${movie.backdrop_path}`
+      : "",
+    description: movie.overview,
+  };
+}
+
+export async function getMovies(page = 1): Promise<MoviesResponse> {
+  const response = await fetch(`${API_BASE_URL}/movies?page=${page}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch movies");
+  }
+
+  const data: TmdbMovieListResponse = await response.json();
+
+  return {
+    page: data.page,
+    total_pages: data.total_pages,
+    total_results: data.total_results,
+    results: data.results.map(mapTmdbMovie),
+  };
+}
