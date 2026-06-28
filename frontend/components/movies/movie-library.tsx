@@ -1,12 +1,11 @@
-import { movies as mockMovies } from "@/data/mock-data";
 import type { Movies } from "@/types/movie";
 import { MovieCard } from "./movie-card";
 
 type MovieLibraryProps = {
-  movies?: Movies[];
+  movies: Movies[];
 };
 
-export function MovieLibrary({ movies = mockMovies }: MovieLibraryProps) {
+export function MovieLibrary({ movies }: MovieLibraryProps) {
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
