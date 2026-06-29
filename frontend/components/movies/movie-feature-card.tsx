@@ -34,9 +34,9 @@ export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
           <h1 className="text-3xl font-bold">{movie.title}</h1>
         </div>
         <div className="flex items-center gap-2">
-          {movie.geners.map((gener) => (
-            <Badge key={gener} variant="outline" className="px-3 py-2 text-sm">
-              {gener}
+          {movie.genres.map((genre) => (
+            <Badge key={genre} variant="outline" className="px-3 py-2 text-sm">
+              {genre}
             </Badge>
           ))}
         </div>

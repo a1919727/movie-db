@@ -1,4 +1,9 @@
-import type { HeroMovie } from "@/types/movie";
+import type {
+  HeroMovie,
+  MovieDetail,
+  MovieInformation,
+  UserReview,
+} from "@/types/movie";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -23,18 +28,42 @@ type TmdbMovieListResponse = {
   total_results: number;
 };
 
-type MoviesResponse = {
+type DiscoverMoviesParams = {
+  genre?: string;
+  year?: string;
+  rating?: string;
+  page?: number;
+};
+
+type TmdbMovieDetailResponse = TmdbMovie & {
+  genres?: Array<{ id: number; name: string }>;
+  origin_country?: string[];
+  spoken_languages?: Array<{ english_name: string; name: string }>;
+  runtime?: number;
+  credits?: {
+    cast: Array<{
+      id: number;
+      name: string;
+      order: number;
+    }>;
+    crew: Array<{
+      id: number;
+      name: string;
+      job: string;
+    }>;
+  };
+};
+
+export type MoviesResponse = {
   page: number;
   results: HeroMovie[];
   total_pages: number;
   total_results: number;
 };
 
-type DiscoverMoviesParams = {
-  genre?: string;
-  year?: string;
-  rating?: string;
-  page?: number;
+export type MovieDetailPageData = {
+  detail: MovieDetail;
+  information: MovieInformation;
 };
 
 const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
@@ -107,4 +136,49 @@ export async function discoverMovies({
   const data: TmdbMovieListResponse = await response.json();
 
   return mapMoviesResponse(data);
+}
+
+export async function getMovieDetails(
+  movieId: number,
+): Promise<MovieDetailPageData> {
+  const response = await fetch(`${API_BASE_URL}/movies/${movieId}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) throw new Error("Failed to fetch movie details");
+
+  const data: TmdbMovieDetailResponse = await response.json();
+  const director =
+    data.credits?.crew.find((member) => member.job === "Director")?.name ??
+    "Unkonwn";
+  const actors =
+    data.credits?.cast
+      .sort((a, b) => a.order - b.order)
+      .slice(0, 3)
+      .map((actor) => actor.name) ?? [];
+  return {
+    detail: {
+      id: data.id,
+      title: data.title,
+      year: Number(data.release_date?.slice(0, 4)) || 0,
+      rating: data.vote_average,
+      posterUrl: data.poster_path
+        ? `${TMDB_POSTER_BASE_URL}${data.poster_path}`
+        : "",
+      description: data.overview,
+      genres: data.genres?.map((genre) => genre.name) ?? [],
+    },
+    information: {
+      id: data.id,
+      country: data.origin_country?.join(", ") || "Unknown",
+      releaseDate: data.release_date || "Unknown",
+      language:
+        data.spoken_languages
+          ?.map((language) => language.english_name)
+          .join(", ") || "Unknown",
+      director,
+      runtime: data.runtime ? `${data.runtime} min` : "Unknown",
+      actors,
+    },
+  };
 }

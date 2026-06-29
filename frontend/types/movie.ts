@@ -23,7 +23,7 @@ export type MovieDetail = {
   rating: number;
   posterUrl: string;
   description: string;
-  geners: string[];
+  genres: string[];
 };
 
 export type MovieInformation = {
