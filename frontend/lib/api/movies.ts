@@ -30,6 +30,13 @@ type MoviesResponse = {
   total_results: number;
 };
 
+type DiscoverMoviesParams = {
+  genre?: string;
+  year?: string;
+  rating?: string;
+  page?: number;
+};
+
 const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const TMDB_BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
 
@@ -49,6 +56,15 @@ function mapTmdbMovie(movie: TmdbMovie): HeroMovie {
   };
 }
 
+function mapMoviesResponse(data: TmdbMovieListResponse): MoviesResponse {
+  return {
+    page: data.page,
+    total_pages: data.total_pages,
+    total_results: data.total_results,
+    results: data.results.map(mapTmdbMovie),
+  };
+}
+
 export async function getMovies(page = 1): Promise<MoviesResponse> {
   const response = await fetch(`${API_BASE_URL}/movies?page=${page}`, {
     cache: "no-store",
@@ -60,10 +76,35 @@ export async function getMovies(page = 1): Promise<MoviesResponse> {
 
   const data: TmdbMovieListResponse = await response.json();
 
-  return {
-    page: data.page,
-    total_pages: data.total_pages,
-    total_results: data.total_results,
-    results: data.results.map(mapTmdbMovie),
-  };
+  return mapMoviesResponse(data);
+}
+
+export async function discoverMovies({
+  genre,
+  year,
+  rating,
+  page = 1,
+}: DiscoverMoviesParams): Promise<MoviesResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+  });
+
+  if (genre) params.set("genre", genre);
+  if (year) params.set("year", year);
+  if (rating) params.set("rating", rating);
+
+  const response = await fetch(
+    `${API_BASE_URL}/movies/discover?${params.toString()}`,
+    {
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to discover movies");
+  }
+
+  const data: TmdbMovieListResponse = await response.json();
+
+  return mapMoviesResponse(data);
 }

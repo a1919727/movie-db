@@ -11,6 +11,11 @@ import {
 type MoviePaginationProps = {
   currentPage: number;
   totalPages: number;
+  searchParams?: {
+    genre?: string;
+    rating?: string;
+    year?: string;
+  };
 };
 
 const PAGE_WINDOW = 2;
@@ -18,12 +23,23 @@ const PAGE_WINDOW = 2;
 export function MoviePagination({
   currentPage,
   totalPages,
+  searchParams,
 }: MoviePaginationProps) {
   if (totalPages <= 1) return null;
 
   const start = Math.max(1, currentPage - PAGE_WINDOW);
   const end = Math.min(totalPages, currentPage + PAGE_WINDOW);
   const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  const buildPageHref = (page: number) => {
+    const params = new URLSearchParams();
+
+    if (searchParams?.genre) params.set("genre", searchParams.genre);
+    if (searchParams?.year) params.set("year", searchParams.year);
+    if (searchParams?.rating) params.set("rating", searchParams.rating);
+    params.set("page", String(page));
+
+    return `?${params.toString()}`;
+  };
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
@@ -31,7 +47,7 @@ export function MoviePagination({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
-              href={currentPage > 1 ? `?page=${currentPage - 1}` : "#"}
+              href={currentPage > 1 ? buildPageHref(currentPage - 1) : "#"}
               aria-disabled={currentPage <= 1}
               className="hover:bg-foreground/10"
             />
@@ -39,7 +55,10 @@ export function MoviePagination({
 
           {start > 1 && (
             <PaginationItem>
-              <PaginationLink href="?page=1" className="hover:bg-foreground/10">
+              <PaginationLink
+                href={buildPageHref(1)}
+                className="hover:bg-foreground/10"
+              >
                 1
               </PaginationLink>
             </PaginationItem>
@@ -53,7 +72,7 @@ export function MoviePagination({
           {pages.map((page) => (
             <PaginationItem key={page}>
               <PaginationLink
-                href={`?page=${page}`}
+                href={buildPageHref(page)}
                 isActive={page === currentPage}
                 className="hover:bg-foreground/10"
               >
@@ -70,7 +89,7 @@ export function MoviePagination({
           {end < totalPages && (
             <PaginationItem>
               <PaginationLink
-                href={`?page=${totalPages}`}
+                href={buildPageHref(totalPages)}
                 className="hover:bg-foreground/10"
               >
                 {totalPages}
@@ -80,7 +99,11 @@ export function MoviePagination({
 
           <PaginationItem>
             <PaginationNext
-              href={currentPage < totalPages ? `?page=${currentPage + 1}` : "#"}
+              href={
+                currentPage < totalPages
+                  ? buildPageHref(currentPage + 1)
+                  : "#"
+              }
               aria-disabled={currentPage >= totalPages}
               className="hover:bg-foreground/10"
             />
