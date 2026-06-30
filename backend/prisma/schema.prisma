@@ -23,14 +23,15 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  name       String
-  email      String     @unique
-  avatarUrl  String?
-  reviews    Review[]
-  favorites  Favorite[]
-  watched    WatchedMovie[]
-  createdAt  DateTime   @default(now())
+  id          Int       @id @default(autoincrement())
+  clerkUserId String    @unique
+  name        String
+  email       String    @unique
+  avatarUrl   String?
+  reviews     Review[]
+  favorites   Favorite[]
+  watched     WatchedMovie[]
+  createdAt   DateTime  @default(now())
 }
 
 model Movie {

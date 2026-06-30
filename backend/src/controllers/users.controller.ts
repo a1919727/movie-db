@@ -49,14 +49,17 @@ export async function getUserById(req: Request, res: Response) {
 }
 
 export async function createUser(req: Request, res: Response) {
-  const { name, email, avatarUrl } = req.body as {
+  const { name, email, avatarUrl, clerkUserId } = req.body as {
     name?: string;
     email?: string;
     avatarUrl?: string | null;
+    clerkUserId?: string;
   };
 
-  if (!name?.trim() || !email?.trim()) {
-    res.status(400).json({ message: "Name and email are required" });
+  if (!name?.trim() || !email?.trim() || !clerkUserId?.trim()) {
+    res
+      .status(400)
+      .json({ message: "Name, email, and clerkUserId are required" });
     return;
   }
 
@@ -66,9 +69,34 @@ export async function createUser(req: Request, res: Response) {
         name: name.trim(),
         email: email.trim(),
         avatarUrl: avatarUrl?.trim() || null,
+        clerkUserId: clerkUserId.trim(),
       },
     });
     res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Failed to fetch user",
+    });
+  }
+}
+
+export async function getUserByClerkId(req: Request, res: Response) {
+  const clerkUserId = req.params.clerkUserId;
+
+  if (typeof clerkUserId !== "string") {
+    return res.status(400).json({ message: "Invalid clerk user id" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId: clerkUserId.trim() },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({
       message: error instanceof Error ? error.message : "Failed to fetch user",

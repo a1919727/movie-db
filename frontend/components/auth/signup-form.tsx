@@ -10,11 +10,13 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
+import { createUser } from "@/lib/api/users";
 
 export function SignupForm() {
   const router = useRouter();
   const { signUp, fetchStatus } = useSignUp();
 
+  const [name, setName] = useState("");
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
 
@@ -25,36 +27,51 @@ export function SignupForm() {
 
     if (!signUp) return;
 
-    const { error } = await signUp.password({
+    const { error } = await signUp.create({
       emailAddress,
       password,
     });
 
     if (error) {
-      console.error(JSON.stringify(error, null, 2));
       toast.error("Sign up failed.");
       return;
     }
 
-    if (signUp.status === "complete") {
-      await signUp.finalize({
-        navigate: ({ session, decorateUrl }) => {
-          if (session?.currentTask) {
-            console.log(session.currentTask);
+    if (signUp.status !== "complete" || !signUp.createdUserId) {
+      toast.error("Sign up is not complete.");
+      return;
+    }
+
+    try {
+      await createUser({
+        clerkUserId: signUp.createdUserId,
+        name: name.trim(),
+        email: emailAddress.trim(),
+        avatarUrl: null,
+      });
+
+      const { error: finalizeError } = await signUp.finalize({
+        navigate: ({ decorateUrl }) => {
+          const url = decorateUrl("/");
+
+          if (url.startsWith("http")) {
+            window.location.href = url;
             return;
           }
 
-          const url = decorateUrl("/");
-          if (url.startsWith("http")) {
-            window.location.href = url;
-          } else {
-            router.push(url);
-          }
+          router.push(url);
         },
       });
-    } else {
-      console.error("Sign-up attempt not complete:", signUp);
-      toast.error("Sign up is not complete.");
+
+      if (finalizeError) {
+        toast.error("Failed to complete sign up.");
+      }
+    } catch (createUserError) {
+      toast.error(
+        createUserError instanceof Error
+          ? createUserError.message
+          : "Failed to create app user",
+      );
     }
   }
 
@@ -83,6 +100,21 @@ export function SignupForm() {
         </CardHeader>
         <CardContent className="px-0">
           <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="name" className="font-semibold">
+                Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Please enter your name"
+                className="h-11 w-full bg-[#1A1A1A] text-[#D2D2D2] sm:h-12"
+                required
+              />
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="email" className="font-semibold">
                 Email
