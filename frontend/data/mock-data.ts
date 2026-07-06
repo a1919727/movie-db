@@ -73,7 +73,7 @@ export const movieDetails: MovieDetail[] = [
     posterUrl: "",
     description:
       "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home. ...",
-    geners: ["Drama", "Action"],
+    genres: ["Drama", "Action"],
   },
   {
     id: 2,
@@ -83,7 +83,7 @@ export const movieDetails: MovieDetail[] = [
     posterUrl: "",
     description:
       "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home. ...",
-    geners: ["Drama", "Action"],
+    genres: ["Drama", "Action"],
   },
 ];
 

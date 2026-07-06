@@ -80,6 +80,62 @@ export async function createUser(req: Request, res: Response) {
   }
 }
 
+export async function syncUser(req: Request, res: Response) {
+  const { name, email, avatarUrl, clerkUserId } = req.body as {
+    name?: string;
+    email?: string;
+    avatarUrl?: string | null;
+    clerkUserId?: string;
+  };
+
+  const normalizedName = name?.trim();
+  const normalizedEmail = email?.trim().toLowerCase();
+  const normalizedClerkUserId = clerkUserId?.trim();
+
+  if (!normalizedEmail || !normalizedClerkUserId) {
+    res.status(400).json({ message: "Email and clerkUserId are required" });
+    return;
+  }
+
+  const fallbackName = normalizedName || normalizedEmail.split("@")[0] || "User";
+
+  try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { clerkUserId: normalizedClerkUserId },
+          { email: normalizedEmail },
+        ],
+      },
+    });
+
+    const user = existingUser
+      ? await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            clerkUserId: normalizedClerkUserId,
+            email: normalizedEmail,
+            name: fallbackName,
+            avatarUrl: avatarUrl?.trim() || null,
+          },
+        })
+      : await prisma.user.create({
+          data: {
+            clerkUserId: normalizedClerkUserId,
+            email: normalizedEmail,
+            name: fallbackName,
+            avatarUrl: avatarUrl?.trim() || null,
+          },
+        });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Failed to sync user",
+    });
+  }
+}
+
 export async function getUserByClerkId(req: Request, res: Response) {
   const clerkUserId = req.params.clerkUserId;
 
