@@ -116,8 +116,8 @@ export function SignupForm() {
 
     const { error } = await signUp.sso({
       strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectCallbackUrl: "/",
+      redirectUrl: "/",
+      redirectCallbackUrl: "/sso-callback",
     });
 
     if (error) {

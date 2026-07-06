@@ -71,8 +71,8 @@ export function LoginForm() {
 
     const { error } = await signIn.sso({
       strategy: "oauth_google",
-      redirectUrl: "/sso-callback",
-      redirectCallbackUrl: "/",
+      redirectUrl: "/",
+      redirectCallbackUrl: "/sso-callback",
     });
 
     if (error) {
