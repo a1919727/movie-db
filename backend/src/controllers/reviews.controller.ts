@@ -62,17 +62,37 @@ export async function createReview(req: Request, res: Response) {
   }
 
   try {
-    const review = await prisma.review.create({
-      data: {
+    const existingReview = await prisma.review.findFirst({
+      where: {
         userId: Number(userId),
         tmdbMovieId: Number(tmdbMovieId),
-        content: content.trim(),
-      },
-      include: {
-        user: true,
       },
     });
-    res.status(201).json(review);
+
+    const review = existingReview
+      ? await prisma.review.update({
+          where: {
+            id: existingReview.id,
+          },
+          data: {
+            content: content.trim(),
+          },
+          include: {
+            user: true,
+          },
+        })
+      : await prisma.review.create({
+          data: {
+            userId: Number(userId),
+            tmdbMovieId: Number(tmdbMovieId),
+            content: content.trim(),
+          },
+          include: {
+            user: true,
+          },
+        });
+
+    res.status(existingReview ? 200 : 201).json(review);
   } catch (error) {
     res.status(500).json({
       message:
