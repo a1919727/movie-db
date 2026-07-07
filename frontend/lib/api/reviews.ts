@@ -7,9 +7,12 @@ if (!API_BASE_URL) {
 }
 
 export async function getReviews(tmdbMovieId: number) {
-  const response = await fetch(`${API_BASE_URL}/reviews?tmdbMovieId=${tmdbMovieId}`, {
-    cache: "no-store",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/reviews?tmdbMovieId=${tmdbMovieId}`,
+    {
+      cache: "no-store",
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Failed to fetch reviews");
@@ -33,13 +36,30 @@ export async function saveReview(payload: {
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as
-      | { message?: string }
-      | null;
+    const errorBody = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
 
     throw new Error(errorBody?.message || "Failed to save review");
   }
 
   const review: Review = await response.json();
   return review;
+}
+
+export async function deleteReview(reviewId: number, userId: number) {
+  const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId }),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+    throw new Error(errorBody?.message || "Failed to delete review");
+  }
 }

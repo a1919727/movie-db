@@ -3,10 +3,16 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { CiFlag1 } from "react-icons/ci";
+import { FaTrash } from "react-icons/fa";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { getReviews } from "@/lib/api/reviews";
 import type { Review } from "@/types/review";
+import { getUserByClerkId } from "@/lib/api/users";
+import type { User } from "@/types/user";
+import { useUser as useClerkUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { deleteReview } from "@/lib/api/reviews";
 
 function formatReviewTime(createdAt: string) {
   const createdAtDate = new Date(createdAt);
@@ -24,9 +30,13 @@ type MovieReviewsProps = {
 };
 
 export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
+  const { user: clerkUser, isLoaded } = useClerkUser();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteReviewId, setDeleteReviewId] = useState<number | null>(null);
+  const [dbUser, setDbUser] = useState<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -36,9 +46,9 @@ export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
       setError(null);
 
       try {
-        const nextReviews = await getReviews(movieId);
+        const fetchReviews = await getReviews(movieId);
         if (mounted) {
-          setReviews(nextReviews);
+          setReviews(fetchReviews);
         }
       } catch (loadError) {
         if (mounted) {
@@ -61,6 +71,56 @@ export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
       mounted = false;
     };
   }, [movieId, refreshKey]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadCurrentUser() {
+      if (!isLoaded || !clerkUser) {
+        if (mounted) setCurrentUser(null);
+        return;
+      }
+
+      const dbUser = await getUserByClerkId(clerkUser.id);
+
+      if (mounted) {
+        setCurrentUser(dbUser);
+      }
+    }
+
+    void loadCurrentUser();
+
+    return () => {
+      mounted = false;
+    };
+  }, [clerkUser, isLoaded]);
+
+  async function handleDeleteReview(reviewId: number) {
+    if (!currentUser) {
+      toast.error("Please sign in before deleting a review.");
+      return;
+    }
+
+    setDeleteReviewId(reviewId);
+
+    try {
+      await deleteReview(reviewId, currentUser.id);
+
+      setReviews((currentReviews) =>
+        currentReviews.filter((review) => review.id !== reviewId),
+      );
+
+      toast.success("Review deleted.");
+    } catch (deleteError) {
+      toast.error(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete review",
+      );
+    } finally {
+      setDeleteReviewId(null);
+    }
+  }
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
@@ -91,7 +151,9 @@ export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
                       {review.user.name.charAt(0)}
                     </div>
                   )}
-                  <span className="text-lg font-medium">{review.user.name}</span>
+                  <span className="text-lg font-medium">
+                    {review.user.name}
+                  </span>
                 </div>
                 <span className="text-lg font-medium">
                   {formatReviewTime(review.createdAt)}
@@ -100,15 +162,27 @@ export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
             </CardHeader>
             <CardContent className="flex justify-between">
               <p className="text-base font-medium">{review.content}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="flag"
-                className="hover:bg-transparent hover:text-white"
-              >
-                <CiFlag1 />
-              </Button>
+              <div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="trash"
+                  className="hover:bg-transparent hover:text-white"
+                  onClick={() => handleDeleteReview(review.id)}
+                >
+                  <FaTrash />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="flag"
+                  className="hover:bg-transparent hover:text-white"
+                >
+                  <CiFlag1 />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

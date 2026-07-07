@@ -100,3 +100,36 @@ export async function createReview(req: Request, res: Response) {
     });
   }
 }
+
+export async function deleteReview(req: Request, res: Response) {
+  const reviewId = Number(req.params.id);
+  const { userId } = req.body as {
+    userId?: number;
+  };
+
+  if (!Number.isInteger(reviewId) || !Number.isInteger(userId)) {
+    return res.status(400).json({ message: "Missing review id and user id" });
+  }
+
+  try {
+    const existingReview = await prisma.review.findUnique({
+      where: { id: reviewId },
+    });
+    if (!existingReview) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    if (existingReview.userId !== Number(userId)) {
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own review" });
+    }
+    await prisma.review.delete({ where: { id: reviewId } });
+    return res.status(200).json({ message: "Delete review successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Failed to delete reviews",
+    });
+  }
+}
