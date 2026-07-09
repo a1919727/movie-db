@@ -50,7 +50,9 @@ export function MovieReviewForm({ movieId, onSaved }: MovieReviewFormProps) {
       await onSaved();
       toast.success("Review saved.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save review");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save review",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -72,12 +74,7 @@ export function MovieReviewForm({ movieId, onSaved }: MovieReviewFormProps) {
               className="min-h-48 border-white/10 bg-zinc-900 text-white"
               disabled={!user || isSubmitting}
             />
-            <div className="mt-5 flex justify-between flex-1">
-              <p className="text-sm text-zinc-400">
-                {user
-                  ? "Submitting again will update your review for this movie."
-                  : "Sign in to write a review."}
-              </p>
+            <div className="mt-5 flex justify-end">
               <Button
                 type="button"
                 onClick={handleSubmit}
