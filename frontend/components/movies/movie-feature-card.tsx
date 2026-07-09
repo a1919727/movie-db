@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
@@ -5,12 +7,18 @@ import { CiPlay1 } from "react-icons/ci";
 import type { MovieDetail } from "@/types/movie";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
 
 type MovieFeatureCardProps = {
   movie: MovieDetail;
 };
 
 export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
+  const handleWatch = () =>
+    movie.watchUrl
+      ? window.open(movie.watchUrl, "_blank", "noopener, noreferrer")
+      : toast.error("Sorry, no available resource");
+
   return (
     <div className="grid grid-cols-2 gap-10 sm:grid-cols-[240px_1fr] md:grid-cols-[1fr_2fr] lg:grid-cols-[300px_1fr]">
       <div className="overflow-hidden rounded-2xl bg-zinc-900">
@@ -53,12 +61,14 @@ export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
             asChild
             size="lg"
             className="rounded-4xl bg-white p-4 text-base font-semibold text-black hover:bg-zinc-200"
+            onClick={handleWatch}
           >
             <Link href="#">
               <CiPlay1 />
               Watch
             </Link>
           </Button>
+
           <Button
             asChild
             size="lg"

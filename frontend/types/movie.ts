@@ -24,6 +24,7 @@ export type MovieDetail = {
   posterUrl: string;
   description: string;
   genres: string[];
+  watchUrl?: string;
 };
 
 export type MovieInformation = {

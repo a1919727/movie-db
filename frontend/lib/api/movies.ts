@@ -40,6 +40,7 @@ type TmdbMovieDetailResponse = TmdbMovie & {
   origin_country?: string[];
   spoken_languages?: Array<{ english_name: string; name: string }>;
   runtime?: number;
+  watchUrl?: string;
   credits?: {
     cast: Array<{
       id: number;
@@ -167,6 +168,7 @@ export async function getMovieDetails(
         : "",
       description: data.overview,
       genres: data.genres?.map((genre) => genre.name) ?? [],
+      watchUrl: data.watchUrl,
     },
     information: {
       id: data.id,

@@ -37,6 +37,15 @@ type TmdbCredits = {
   cast: TmdbCreditMember[];
 };
 
+type TmdbWatchProviderRegion = {
+  link?: string;
+};
+
+type TmdbWatchProvidersResponse = {
+  id: number;
+  results?: Record<string, TmdbWatchProviderRegion>;
+};
+
 function getTmdbApiKey() {
   const tmdbApiKey = process.env.TMDB_API_KEY;
 
@@ -103,7 +112,17 @@ export async function discoverMovies(params: {
 }
 
 export async function getMovieDetails(id: string | number) {
-  return fetchTmdbData<TmdbMovie & { credits: TmdbCredits }>(`/movie/${id}`, {
-    append_to_response: "credits",
-  });
+  const [detail, watchProviders] = await Promise.all([
+    fetchTmdbData<TmdbMovie & { credits: TmdbCredits }>(`/movie/${id}`, {
+      append_to_response: "credits",
+    }),
+    fetchTmdbData<TmdbWatchProvidersResponse>(`/movie/${id}/watch/providers`),
+  ]);
+
+  const watchUrl =
+    watchProviders.results?.US?.link ??
+    watchProviders.results?.AU?.link ??
+    Object.values(watchProviders.results ?? {}).find((region) => region.link);
+
+  return { ...detail, watchUrl };
 }
