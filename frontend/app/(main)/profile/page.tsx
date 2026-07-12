@@ -1,11 +1,5 @@
-import { ProfileTabs } from "@/components/profile/profile-tabs";
-import { ProfileHeader } from "@/components/profile/profile-header";
+import { ProfileClient } from "@/components/profile/profile-client";
 
 export default function Profile() {
-  return (
-    <>
-      <ProfileHeader />
-      <ProfileTabs />
-    </>
-  );
+  return <ProfileClient />;
 }

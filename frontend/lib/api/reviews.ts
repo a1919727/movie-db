@@ -1,4 +1,4 @@
-import type { Review } from "@/types/review";
+import type { Review, UserReview } from "@/types/review";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -19,6 +19,19 @@ export async function getReviews(tmdbMovieId: number) {
   }
 
   const reviews: Review[] = await response.json();
+  return reviews;
+}
+
+export async function getReviewsByUserId(userId: number) {
+  const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user reviews");
+  }
+
+  const reviews: UserReview[] = await response.json();
   return reviews;
 }
 

@@ -10,3 +10,12 @@ export type Review = {
     avatarUrl: string | null;
   };
 };
+
+export type UserReview = {
+  title: string;
+  id: number;
+  content: string;
+  createdAt: string;
+  tmdbMovieId: number;
+  userId: number;
+};

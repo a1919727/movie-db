@@ -4,38 +4,63 @@ import { TbMovie } from "react-icons/tb";
 import { CiStar, CiHeart } from "react-icons/ci";
 import { useState } from "react";
 import Link from "next/link";
-
-import { movies } from "@/data/mock-data";
+import type { Movies } from "@/types/movie";
+import type { User } from "@/types/user";
+import type { UserReview } from "@/types/review";
 import { ProfileMovieCarousel } from "./profile-movie-carousel";
+import { ProfileReviewList } from "./profile-review-list";
 import { Button } from "../ui/button";
 
-const profileStats = [
-  { label: "Watch", value: 247, icon: TbMovie },
-  { label: "Review", value: 89, icon: CiStar },
-  { label: "Favorites", value: 15, icon: CiHeart },
-] as const;
+type ProfileTabsProps = {
+  user: User;
+  reviews: UserReview[];
+};
 
-const profileCollections = {
-  Watch: { href: "/watchlist", movies },
-  Review: { href: "/reviews", movies: [...movies].reverse() },
-  Favorites: { href: "/favorites", movies: movies.slice(0, 6) },
-} as const;
+function mapMovieToMovieCard(movie: {
+  tmdbId: number;
+  title: string;
+  year: number | null;
+  rating: number | null;
+  posterUrl: string | null;
+}): Movies {
+  return {
+    id: movie.tmdbId,
+    title: movie.title,
+    year: movie.year ?? 0,
+    rating: movie.rating ?? 0,
+    posterUrl: movie.posterUrl ?? "",
+  };
+}
 
-export function ProfileTabs() {
-  const [activeTab, setActiveTab] =
-    useState<(typeof profileStats)[number]["label"]>("Watch");
+export function ProfileTabs({ user, reviews }: ProfileTabsProps) {
+  const [activeTab, setActiveTab] = useState<"Watch" | "Review" | "Favorites">(
+    "Watch",
+  );
+
+  const watchedMovies: Movies[] =
+    user.watched?.map((item) => mapMovieToMovieCard(item.movie)) ?? [];
+
+  const favoriteMovies: Movies[] =
+    user.favorites?.map((item) => mapMovieToMovieCard(item.movie)) ?? [];
+
+  const profileStats = [
+    { label: "Watch", value: watchedMovies.length, icon: TbMovie },
+    { label: "Review", value: reviews.length, icon: CiStar },
+    { label: "Favorites", value: favoriteMovies.length, icon: CiHeart },
+  ] as const;
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
-      <div className="flex justify-end -mt-4 mb-6">
+      <div className="-mt-4 mb-6 flex justify-end">
         <Button
           variant="outline"
           size="sm"
-          className="rounded-full border-white/20 bg-white/10 text-white hover:bg-white/20 text-base p-4"
+          className="rounded-full border-white/20 bg-white/10 p-4 text-base text-white hover:bg-white/20"
         >
           <Link href="/profile/edit">Edit profile</Link>
         </Button>
       </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
         {profileStats.map((item) => {
           const Icon = item.icon;
@@ -68,10 +93,15 @@ export function ProfileTabs() {
         })}
       </div>
 
-      <ProfileMovieCarousel
-        href={profileCollections[activeTab].href}
-        movies={profileCollections[activeTab].movies}
-      />
+      {activeTab === "Watch" && (
+        <ProfileMovieCarousel href="/watchlist" movies={watchedMovies} />
+      )}
+
+      {activeTab === "Favorites" && (
+        <ProfileMovieCarousel href="/favorites" movies={favoriteMovies} />
+      )}
+
+      {activeTab === "Review" && <ProfileReviewList reviews={reviews} />}
     </section>
   );
 }

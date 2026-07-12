@@ -152,6 +152,17 @@ export async function getUserByClerkId(req: Request, res: Response) {
           include: {
             movie: true,
           },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+        watched: {
+          include: {
+            movie: true,
+          },
+          orderBy: {
+            watchedAt: "desc",
+          },
         },
       },
     });
