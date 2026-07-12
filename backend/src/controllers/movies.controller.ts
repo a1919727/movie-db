@@ -5,6 +5,7 @@ import {
   searchMovies,
   discoverMovies,
 } from "../services/tmdb.service.js";
+import { prisma } from "../lib/prisma.js";
 
 export async function getMovies(req: Request, res: Response) {
   try {
@@ -37,6 +38,36 @@ export async function getMovieById(req: Request, res: Response) {
         error instanceof Error
           ? error.message
           : "Failed to fetch movie details",
+    });
+  }
+}
+
+export async function getUserByClerkId(req: Request, res: Response) {
+  const clerkUserId = req.params.clerkUserId;
+
+  if (typeof clerkUserId !== "string") {
+    return res.status(400).json({ message: "Invalid clerk user id" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { clerkUserId: clerkUserId.trim() },
+      include: {
+        favorites: {
+          include: {
+            movie: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: error instanceof Error ? error.message : "Failed to fetch user",
     });
   }
 }

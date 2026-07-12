@@ -65,13 +65,60 @@ export async function syncClerkUser(payload: {
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as
-      | { message?: string }
-      | null;
+    const errorBody = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
 
     throw new Error(errorBody?.message || "Failed to sync user");
   }
 
   const syncedUser: User = await response.json();
   return syncedUser;
+}
+
+export async function addFavorite(
+  userId: number,
+  payload: {
+    tmdbId: number;
+    title: string;
+    year: number;
+    rating: number;
+    posterUrl: string;
+    description: string;
+    genres: string[];
+  },
+) {
+  const response = await fetch(`${API_BASE_URL}/users/${userId}/favorites`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+
+    throw new Error(errorBody?.message || "Failed to add favorite");
+  }
+  return response.json();
+}
+
+export async function deleteFavorite(userId: number, tmdbMovieId: number) {
+  const response = await fetch(
+    `${API_BASE_URL}/users/${userId}/favorites/${tmdbMovieId}`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as {
+      message?: string;
+    } | null;
+
+    throw new Error(errorBody?.message || "Failed to delete favorite");
+  }
 }

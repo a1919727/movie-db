@@ -97,7 +97,8 @@ export async function syncUser(req: Request, res: Response) {
     return;
   }
 
-  const fallbackName = normalizedName || normalizedEmail.split("@")[0] || "User";
+  const fallbackName =
+    normalizedName || normalizedEmail.split("@")[0] || "User";
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -146,6 +147,13 @@ export async function getUserByClerkId(req: Request, res: Response) {
   try {
     const user = await prisma.user.findUnique({
       where: { clerkUserId: clerkUserId.trim() },
+      include: {
+        favorites: {
+          include: {
+            movie: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -156,6 +164,100 @@ export async function getUserByClerkId(req: Request, res: Response) {
   } catch (error) {
     res.status(500).json({
       message: error instanceof Error ? error.message : "Failed to fetch user",
+    });
+  }
+}
+
+export async function addFavorite(req: Request, res: Response) {
+  const userId = Number(req.params.id);
+
+  const { tmdbId, title, year, rating, posterUrl, description } = req.body as {
+    tmdbId?: number;
+    title?: string;
+    year?: number;
+    rating?: number;
+    posterUrl?: string;
+    description?: string;
+  };
+
+  if (!userId || !tmdbId || !title?.trim()) {
+    return res
+      .status(400)
+      .json({ message: "Invalid userId or tmdbId or title" });
+  }
+  try {
+    const movie = await prisma.movie.upsert({
+      where: { tmdbId },
+      update: {
+        title: title.trim(),
+        year: year ?? null,
+        rating: rating ?? null,
+        posterUrl: posterUrl ?? null,
+        description: description ?? null,
+      },
+      create: {
+        tmdbId,
+        title: title.trim(),
+        year: year ?? null,
+        rating: rating ?? null,
+        posterUrl: posterUrl ?? null,
+        description: description ?? null,
+      },
+    });
+
+    const favorite = await prisma.favorite.upsert({
+      where: {
+        userId_movieId: {
+          userId,
+          movieId: movie.id,
+        },
+      },
+      update: {},
+      create: {
+        userId,
+        movieId: movie.id,
+      },
+    });
+
+    return res.status(201).json(favorite);
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Failed to add favorite",
+    });
+  }
+}
+
+export async function deleteFavorite(req: Request, res: Response) {
+  const userId = Number(req.params.id);
+  const tmdbMovieId = Number(req.params.tmdbMovieId);
+
+  if (!userId || !tmdbMovieId) {
+    return res.status(400).json({ message: "Invalid params" });
+  }
+
+  try {
+    const movie = await prisma.movie.findUnique({
+      where: { tmdbId: tmdbMovieId },
+    });
+
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    await prisma.favorite.delete({
+      where: {
+        userId_movieId: {
+          userId,
+          movieId: movie.id,
+        },
+      },
+    });
+    return res.status(200).json({ message: "Delete favourite successfully" });
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        error instanceof Error ? error.message : "Failed to delete favorite",
     });
   }
 }
