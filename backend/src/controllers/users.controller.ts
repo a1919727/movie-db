@@ -1,5 +1,14 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
+import { z } from "zod";
+import { parseRequest } from "../utils/validation.js";
+import {
+  clerkUserIdParamSchema,
+  idParamSchema,
+  userMovieParamsSchema,
+} from "../schemas/common.schema.js";
+import { moviePayloadSchema } from "../schemas/movie.schema.js";
+import { createUserSchema, syncUserSchema } from "../schemas/user.schema.js";
 
 export async function getUsers(_req: Request, res: Response) {
   try {
@@ -10,103 +19,69 @@ export async function getUsers(_req: Request, res: Response) {
     });
     res.status(200).json(users);
   } catch (error) {
+    console.log(error);
     res.status(500).json({
-      message: error instanceof Error ? error.message : "Failed to fetch users",
+      message: "Failed to fetch users",
     });
   }
 }
 
 export async function getUserById(req: Request, res: Response) {
-  const userId = Number(req.params.id);
-
-  if (!userId) return res.status(400).json({ message: "Invalid user id" });
+  const params = parseRequest(idParamSchema, req.params, res);
+  if (!params) return;
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: params.id },
       include: {
-        reviews: {
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-        favorites: true,
-        watched: {
-          orderBy: {
-            watchedAt: "desc",
-          },
-        },
+        reviews: { orderBy: { createdAt: "desc" } },
+        favorites: { include: { movie: true } },
+        watched: { include: { movie: true }, orderBy: { watchedAt: "desc" } },
       },
     });
 
     if (!user) return res.status(404).json({ message: "User not found" });
     res.status(200).json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: error instanceof Error ? error.message : "Failed to fetch user",
+      message: "Failed to fetch user",
     });
   }
 }
 
 export async function createUser(req: Request, res: Response) {
-  const { name, email, avatarUrl, clerkUserId } = req.body as {
-    name?: string;
-    email?: string;
-    avatarUrl?: string | null;
-    clerkUserId?: string;
-  };
-
-  if (!name?.trim() || !email?.trim() || !clerkUserId?.trim()) {
-    res
-      .status(400)
-      .json({ message: "Name, email, and clerkUserId are required" });
-    return;
-  }
+  const body = parseRequest(createUserSchema, req.body, res);
+  if (!body) return;
 
   try {
     const user = await prisma.user.create({
       data: {
-        name: name.trim(),
-        email: email.trim(),
-        avatarUrl: avatarUrl?.trim() || null,
-        clerkUserId: clerkUserId.trim(),
+        name: body.name,
+        email: body.email,
+        avatarUrl: body.avatarUrl || null,
+        clerkUserId: body.clerkUserId,
       },
     });
     res.status(201).json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: error instanceof Error ? error.message : "Failed to fetch user",
+      message: "Failed to fetch user",
     });
   }
 }
 
 export async function syncUser(req: Request, res: Response) {
-  const { name, email, avatarUrl, clerkUserId } = req.body as {
-    name?: string;
-    email?: string;
-    avatarUrl?: string | null;
-    clerkUserId?: string;
-  };
+  const body = parseRequest(syncUserSchema, req.body, res);
+  if (!body) return;
 
-  const normalizedName = name?.trim();
-  const normalizedEmail = email?.trim().toLowerCase();
-  const normalizedClerkUserId = clerkUserId?.trim();
-
-  if (!normalizedEmail || !normalizedClerkUserId) {
-    res.status(400).json({ message: "Email and clerkUserId are required" });
-    return;
-  }
-
-  const fallbackName =
-    normalizedName || normalizedEmail.split("@")[0] || "User";
+  const fallbackName = body.name || body.email.split("@")[0] || "User";
 
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { clerkUserId: normalizedClerkUserId },
-          { email: normalizedEmail },
-        ],
+        OR: [{ clerkUserId: body.clerkUserId }, { email: body.email }],
       },
     });
 
@@ -114,56 +89,39 @@ export async function syncUser(req: Request, res: Response) {
       ? await prisma.user.update({
           where: { id: existingUser.id },
           data: {
-            clerkUserId: normalizedClerkUserId,
-            email: normalizedEmail,
+            clerkUserId: body.clerkUserId,
+            email: body.email,
             name: fallbackName,
-            avatarUrl: avatarUrl?.trim() || null,
+            avatarUrl: body.avatarUrl || null,
           },
         })
       : await prisma.user.create({
           data: {
-            clerkUserId: normalizedClerkUserId,
-            email: normalizedEmail,
+            clerkUserId: body.clerkUserId,
+            email: body.email,
             name: fallbackName,
-            avatarUrl: avatarUrl?.trim() || null,
+            avatarUrl: body.avatarUrl || null,
           },
         });
-
     res.status(200).json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: error instanceof Error ? error.message : "Failed to sync user",
+      message: "Failed to sync user",
     });
   }
 }
 
 export async function getUserByClerkId(req: Request, res: Response) {
-  const clerkUserId = req.params.clerkUserId;
-
-  if (typeof clerkUserId !== "string") {
-    return res.status(400).json({ message: "Invalid clerk user id" });
-  }
+  const params = parseRequest(clerkUserIdParamSchema, req.params, res);
+  if (!params) return;
 
   try {
     const user = await prisma.user.findUnique({
-      where: { clerkUserId: clerkUserId.trim() },
+      where: { clerkUserId: params.clerkUserId },
       include: {
-        favorites: {
-          include: {
-            movie: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-        watched: {
-          include: {
-            movie: true,
-          },
-          orderBy: {
-            watchedAt: "desc",
-          },
-        },
+        favorites: { include: { movie: true }, orderBy: { createdAt: "desc" } },
+        watched: { include: { movie: true }, orderBy: { watchedAt: "desc" } },
       },
     });
 
@@ -173,102 +131,167 @@ export async function getUserByClerkId(req: Request, res: Response) {
 
     res.status(200).json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({
-      message: error instanceof Error ? error.message : "Failed to fetch user",
+      message: "Failed to fetch user",
     });
   }
 }
 
 export async function addFavorite(req: Request, res: Response) {
-  const userId = Number(req.params.id);
+  const params = parseRequest(idParamSchema, req.params, res);
+  if (!params) return;
 
-  const { tmdbId, title, year, rating, posterUrl, description } = req.body as {
-    tmdbId?: number;
-    title?: string;
-    year?: number;
-    rating?: number;
-    posterUrl?: string;
-    description?: string;
-  };
+  const body = parseRequest(moviePayloadSchema, req.body, res);
+  if (!body) return;
 
-  if (!userId || !tmdbId || !title?.trim()) {
-    return res
-      .status(400)
-      .json({ message: "Invalid userId or tmdbId or title" });
-  }
   try {
     const movie = await prisma.movie.upsert({
-      where: { tmdbId },
+      where: { tmdbId: body.tmdbId },
       update: {
-        title: title.trim(),
-        year: year ?? null,
-        rating: rating ?? null,
-        posterUrl: posterUrl ?? null,
-        description: description ?? null,
+        title: body.title,
+        year: body.year ?? null,
+        rating: body.rating ?? null,
+        posterUrl: body.posterUrl ?? null,
+        description: body.description ?? null,
       },
       create: {
-        tmdbId,
-        title: title.trim(),
-        year: year ?? null,
-        rating: rating ?? null,
-        posterUrl: posterUrl ?? null,
-        description: description ?? null,
+        tmdbId: body.tmdbId,
+        title: body.title,
+        year: body.year ?? null,
+        rating: body.rating ?? null,
+        posterUrl: body.posterUrl ?? null,
+        description: body.description ?? null,
       },
     });
 
     const favorite = await prisma.favorite.upsert({
       where: {
         userId_movieId: {
-          userId,
+          userId: params.id,
           movieId: movie.id,
         },
       },
       update: {},
       create: {
-        userId,
+        userId: params.id,
         movieId: movie.id,
       },
     });
 
     return res.status(201).json(favorite);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
-      message:
-        error instanceof Error ? error.message : "Failed to add favorite",
+      message: "Failed to add favorite",
     });
   }
 }
 
 export async function deleteFavorite(req: Request, res: Response) {
-  const userId = Number(req.params.id);
-  const tmdbMovieId = Number(req.params.tmdbMovieId);
-
-  if (!userId || !tmdbMovieId) {
-    return res.status(400).json({ message: "Invalid params" });
-  }
+  const params = parseRequest(userMovieParamsSchema, req.params, res);
+  if (!params) return;
 
   try {
     const movie = await prisma.movie.findUnique({
-      where: { tmdbId: tmdbMovieId },
+      where: { tmdbId: params.tmdbMovieId },
     });
 
     if (!movie) {
       return res.status(404).json({ message: "Movie not found" });
     }
-
     await prisma.favorite.delete({
       where: {
         userId_movieId: {
-          userId,
+          userId: params.id,
           movieId: movie.id,
         },
       },
     });
     return res.status(200).json({ message: "Delete favourite successfully" });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
-      message:
-        error instanceof Error ? error.message : "Failed to delete favorite",
+      message: "Failed to delete favorite",
+    });
+  }
+}
+
+export async function addWatched(req: Request, res: Response) {
+  const params = parseRequest(idParamSchema, req.params, res);
+  if (!params) return;
+
+  const body = parseRequest(moviePayloadSchema, req.body, res);
+  if (!body) return;
+
+  try {
+    const movie = await prisma.movie.upsert({
+      where: { tmdbId: body.tmdbId },
+      update: {
+        title: body.title,
+        year: body.year ?? null,
+        rating: body.rating ?? null,
+        posterUrl: body.posterUrl ?? null,
+        description: body.description ?? null,
+      },
+      create: {
+        tmdbId: body.tmdbId,
+        title: body.title,
+        year: body.year ?? null,
+        rating: body.rating ?? null,
+        posterUrl: body.posterUrl ?? null,
+        description: body.description ?? null,
+      },
+    });
+
+    const watchedMovie = await prisma.watchedMovie.upsert({
+      where: {
+        userId_movieId: {
+          userId: params.id,
+          movieId: movie.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: params.id,
+        movieId: movie.id,
+      },
+    });
+
+    return res.status(201).json(watchedMovie);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to add favorite",
+    });
+  }
+}
+
+export async function deleteWatched(req: Request, res: Response) {
+  const params = parseRequest(userMovieParamsSchema, req.params, res);
+  if (!params) return;
+
+  try {
+    const movie = await prisma.movie.findUnique({
+      where: { tmdbId: params.tmdbMovieId },
+    });
+
+    if (!movie) {
+      return res.status(404).json({ message: "Movie not found" });
+    }
+
+    await prisma.watchedMovie.delete({
+      where: {
+        userId_movieId: {
+          userId: params.id,
+          movieId: movie.id,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to delete watched movie",
     });
   }
 }
