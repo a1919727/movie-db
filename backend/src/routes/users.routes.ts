@@ -21,6 +21,6 @@ router.delete("/:id/favorites/:tmdbMovieId", deleteFavorite);
 router.post("/sync", syncUser);
 router.post("/", createUser);
 router.post("/:id/watched", addWatched);
-router.delete("/:id/watched/: tmdbMovieId", deleteWatched);
+router.delete("/:id/watched/:tmdbMovieId", deleteWatched);
 
 export default router;
