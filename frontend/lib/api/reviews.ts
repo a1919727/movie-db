@@ -1,21 +1,16 @@
 import type { Review, UserReview } from "@/types/review";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
-}
+import { fetchFromApi, getErrorMessage } from "./client";
 
 export async function getReviews(tmdbMovieId: number) {
-  const response = await fetch(
-    `${API_BASE_URL}/reviews?tmdbMovieId=${tmdbMovieId}`,
+  const response = await fetchFromApi(
+    `/reviews?tmdbMovieId=${tmdbMovieId}`,
     {
       cache: "no-store",
     },
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch reviews");
+    throw new Error(await getErrorMessage(response, "Failed to fetch reviews"));
   }
 
   const reviews: Review[] = await response.json();
@@ -23,12 +18,14 @@ export async function getReviews(tmdbMovieId: number) {
 }
 
 export async function getReviewsByUserId(userId: number) {
-  const response = await fetch(`${API_BASE_URL}/reviews/user/${userId}`, {
+  const response = await fetchFromApi(`/reviews/user/${userId}`, {
     cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch user reviews");
+    throw new Error(
+      await getErrorMessage(response, "Failed to fetch user reviews"),
+    );
   }
 
   const reviews: UserReview[] = await response.json();
@@ -40,7 +37,7 @@ export async function saveReview(payload: {
   tmdbMovieId: number;
   content: string;
 }) {
-  const response = await fetch(`${API_BASE_URL}/reviews`, {
+  const response = await fetchFromApi("/reviews", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -49,11 +46,7 @@ export async function saveReview(payload: {
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-
-    throw new Error(errorBody?.message || "Failed to save review");
+    throw new Error(await getErrorMessage(response, "Failed to save review"));
   }
 
   const review: Review = await response.json();
@@ -61,7 +54,7 @@ export async function saveReview(payload: {
 }
 
 export async function deleteReview(reviewId: number, userId: number) {
-  const response = await fetch(`${API_BASE_URL}/reviews/${reviewId}`, {
+  const response = await fetchFromApi(`/reviews/${reviewId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -70,9 +63,8 @@ export async function deleteReview(reviewId: number, userId: number) {
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-    throw new Error(errorBody?.message || "Failed to delete review");
+    throw new Error(
+      await getErrorMessage(response, "Failed to delete review"),
+    );
   }
 }

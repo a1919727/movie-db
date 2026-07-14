@@ -1,10 +1,5 @@
 import type { User } from "../../types/user";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
-}
+import { fetchFromApi, getErrorMessage } from "./client";
 
 export async function createUser(payload: {
   name: string;
@@ -12,7 +7,7 @@ export async function createUser(payload: {
   avatarUrl?: string | null;
   clerkUserId: string;
 }) {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+  const response = await fetchFromApi("/users", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -21,7 +16,7 @@ export async function createUser(payload: {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create user");
+    throw new Error(await getErrorMessage(response, "Failed to create user"));
   }
 
   const createdUser: User = await response.json();
@@ -29,7 +24,7 @@ export async function createUser(payload: {
 }
 
 export async function getUserByClerkId(clerkUserId: string) {
-  const response = await fetch(`${API_BASE_URL}/users/clerk/${clerkUserId}`, {
+  const response = await fetchFromApi(`/users/clerk/${clerkUserId}`, {
     cache: "no-store",
   });
 
@@ -38,7 +33,9 @@ export async function getUserByClerkId(clerkUserId: string) {
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch user by clerk id");
+    throw new Error(
+      await getErrorMessage(response, "Failed to fetch user by clerk id"),
+    );
   }
 
   const fetchUser: User = await response.json();
@@ -51,7 +48,7 @@ export async function syncClerkUser(payload: {
   name?: string | null;
   avatarUrl?: string | null;
 }) {
-  const response = await fetch(`${API_BASE_URL}/users/sync`, {
+  const response = await fetchFromApi("/users/sync", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -65,11 +62,7 @@ export async function syncClerkUser(payload: {
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-
-    throw new Error(errorBody?.message || "Failed to sync user");
+    throw new Error(await getErrorMessage(response, "Failed to sync user"));
   }
 
   const syncedUser: User = await response.json();
@@ -88,7 +81,7 @@ export async function addFavorite(
     genres: string[];
   },
 ) {
-  const response = await fetch(`${API_BASE_URL}/users/${userId}/favorites`, {
+  const response = await fetchFromApi(`/users/${userId}/favorites`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -97,28 +90,22 @@ export async function addFavorite(
   });
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-
-    throw new Error(errorBody?.message || "Failed to add favorite");
+    throw new Error(await getErrorMessage(response, "Failed to add favorite"));
   }
   return response.json();
 }
 
 export async function deleteFavorite(userId: number, tmdbMovieId: number) {
-  const response = await fetch(
-    `${API_BASE_URL}/users/${userId}/favorites/${tmdbMovieId}`,
+  const response = await fetchFromApi(
+    `/users/${userId}/favorites/${tmdbMovieId}`,
     {
       method: "DELETE",
     },
   );
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-
-    throw new Error(errorBody?.message || "Failed to delete favorite");
+    throw new Error(
+      await getErrorMessage(response, "Failed to delete favorite"),
+    );
   }
 }

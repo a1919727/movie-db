@@ -4,12 +4,7 @@ import type {
   MovieInformation,
   UserReview,
 } from "@/types/movie";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  throw new Error("Missing NEXT_PUBLIC_API_BASE_URL");
-}
+import { fetchFromApi, getErrorMessage } from "./client";
 
 type TmdbMovie = {
   id: number;
@@ -96,12 +91,12 @@ function mapMoviesResponse(data: TmdbMovieListResponse): MoviesResponse {
 }
 
 export async function getMovies(page = 1): Promise<MoviesResponse> {
-  const response = await fetch(`${API_BASE_URL}/movies?page=${page}`, {
+  const response = await fetchFromApi(`/movies?page=${page}`, {
     cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch movies");
+    throw new Error(await getErrorMessage(response, "Failed to fetch movies"));
   }
 
   const data: TmdbMovieListResponse = await response.json();
@@ -123,15 +118,17 @@ export async function discoverMovies({
   if (year) params.set("year", year);
   if (rating) params.set("rating", rating);
 
-  const response = await fetch(
-    `${API_BASE_URL}/movies/discover?${params.toString()}`,
+  const response = await fetchFromApi(
+    `/movies/discover?${params.toString()}`,
     {
       cache: "no-store",
     },
   );
 
   if (!response.ok) {
-    throw new Error("Failed to discover movies");
+    throw new Error(
+      await getErrorMessage(response, "Failed to discover movies"),
+    );
   }
 
   const data: TmdbMovieListResponse = await response.json();
@@ -142,11 +139,15 @@ export async function discoverMovies({
 export async function getMovieDetails(
   movieId: number,
 ): Promise<MovieDetailPageData> {
-  const response = await fetch(`${API_BASE_URL}/movies/${movieId}`, {
+  const response = await fetchFromApi(`/movies/${movieId}`, {
     cache: "no-store",
   });
 
-  if (!response.ok) throw new Error("Failed to fetch movie details");
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(response, "Failed to fetch movie details"),
+    );
+  }
 
   const data: TmdbMovieDetailResponse = await response.json();
   const director =
