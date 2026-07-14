@@ -51,50 +51,6 @@ export default function ProfileEdit() {
                 required
               />
             </div>
-            <div className="flex flex-col gap-4 border-t border-[#1F1F1F]">
-              <h3 className="text-xl mt-4 flex items-center gap-2">
-                <CiLock /> Change Password
-              </h3>
-              <div className="grid gap-2">
-                <Label htmlFor="current-password" className="font-semibold">
-                  Current Password
-                </Label>
-                <Input
-                  id="current-password"
-                  name="currentPassword"
-                  type="password"
-                  placeholder="Please enter your current password"
-                  className="h-11 w-full bg-[#1A1A1A] text-[#D2D2D2] sm:h-12"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new-password" className="font-semibold">
-                  New Password
-                </Label>
-                <Input
-                  id="new-password"
-                  name="newPassword"
-                  type="password"
-                  placeholder="Please enter your new password"
-                  className="h-11 w-full bg-[#1A1A1A] text-[#D2D2D2] sm:h-12"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="confirm-new-password" className="font-semibold">
-                  Confirm new Password
-                </Label>
-                <Input
-                  id="confirm-new-password"
-                  name="confirmNewPassword"
-                  type="password"
-                  placeholder="Please confirm your new password"
-                  className="h-11 w-full bg-[#1A1A1A] text-[#D2D2D2] sm:h-12"
-                  required
-                />
-              </div>
-            </div>
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-between">
               <Button
                 type="submit"
