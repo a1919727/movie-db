@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { CiFlag1 } from "react-icons/ci";
 import { FaTrash } from "react-icons/fa";
-import Image from "next/image";
 import { Button } from "../ui/button";
 import { getReviews } from "@/lib/api/reviews";
 import type { Review } from "@/types/review";
@@ -139,11 +138,9 @@ export function MovieReviews({ movieId, refreshKey }: MovieReviewsProps) {
               <div className="flex justify-between items-center">
                 <div className="flex gap-4">
                   {review.user.avatarUrl ? (
-                    <Image
+                    <img
                       src={review.user.avatarUrl}
                       alt={review.user.name}
-                      width={40}
-                      height={40}
                       className="h-10 w-10 object-cover rounded-3xl"
                     />
                   ) : (

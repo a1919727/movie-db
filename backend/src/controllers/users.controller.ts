@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma.js";
-import { z } from "zod";
 import { parseRequest } from "../utils/validation.js";
 import {
   clerkUserIdParamSchema,
@@ -8,7 +7,12 @@ import {
   userMovieParamsSchema,
 } from "../schemas/common.schema.js";
 import { moviePayloadSchema } from "../schemas/movie.schema.js";
-import { createUserSchema, syncUserSchema } from "../schemas/user.schema.js";
+import {
+  createUserSchema,
+  syncUserSchema,
+  updateUserProfileSchema,
+} from "../schemas/user.schema.js";
+import { uploadAvatar } from "../services/upload.service.js";
 
 export async function getUsers(_req: Request, res: Response) {
   try {
@@ -92,7 +96,7 @@ export async function syncUser(req: Request, res: Response) {
             clerkUserId: body.clerkUserId,
             email: body.email,
             name: fallbackName,
-            avatarUrl: body.avatarUrl || null,
+            avatarUrl: existingUser.avatarUrl || body.avatarUrl || null,
           },
         })
       : await prisma.user.create({
@@ -108,6 +112,35 @@ export async function syncUser(req: Request, res: Response) {
     console.error(error);
     res.status(500).json({
       message: "Failed to sync user",
+    });
+  }
+}
+
+export async function updateUserProfile(req: Request, res: Response) {
+  const params = parseRequest(idParamSchema, req.params, res);
+  if (!params) return;
+
+  const body = parseRequest(updateUserProfileSchema, req.body, res);
+  if (!body) return;
+
+  try {
+    const avatarUrl = req.file
+      ? await uploadAvatar(req.file.buffer, params.id)
+      : undefined;
+
+    const user = await prisma.user.update({
+      where: { id: params.id },
+      data: {
+        name: body.name,
+        ...(avatarUrl ? { avatarUrl } : {}),
+      },
+    });
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Failed to update profile",
     });
   }
 }

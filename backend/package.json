@@ -14,9 +14,11 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "multer": "^2.2.0",
     "pg": "^8.22.0",
     "prisma": "^6.19.3",
     "zod": "^4.4.3"
@@ -24,6 +26,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/multer": "^2.2.0",
     "@types/node": "^26.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"

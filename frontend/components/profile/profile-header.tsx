@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { User } from "@/types/user";
 
 type ProfileHeaderProps = {
@@ -10,11 +9,9 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <div className="flex flex-col items-center text-center bg-zinc-900 rounded-3xl py-6">
         {user.avatarUrl ? (
-          <Image
+          <img
             src={user.avatarUrl}
             alt={user.name}
-            width={96}
-            height={96}
             className="mb-4 h-24 w-24 rounded-full object-cover"
           />
         ) : (

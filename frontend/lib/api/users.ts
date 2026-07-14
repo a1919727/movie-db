@@ -69,6 +69,32 @@ export async function syncClerkUser(payload: {
   return syncedUser;
 }
 
+export async function updateUserProfile(
+  userId: number,
+  payload: {
+    name: string;
+    avatar?: File | null;
+  },
+) {
+  const formData = new FormData();
+  formData.set("name", payload.name);
+  if (payload.avatar) {
+    formData.set("avatar", payload.avatar);
+  }
+
+  const response = await fetchFromApi(`/users/${userId}`, {
+    method: "PATCH",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Failed to update profile"));
+  }
+
+  const updatedUser: User = await response.json();
+  return updatedUser;
+}
+
 export async function addFavorite(
   userId: number,
   payload: {
