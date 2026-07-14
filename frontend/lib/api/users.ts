@@ -109,3 +109,31 @@ export async function deleteFavorite(userId: number, tmdbMovieId: number) {
     );
   }
 }
+
+export async function addWatched(
+  userId: number,
+  payload: {
+    tmdbId: number;
+    title: string;
+    year: number;
+    rating: number;
+    posterUrl: string;
+    description: string;
+  },
+) {
+  const response = await fetchFromApi(`/users/${userId}/watched`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      await getErrorMessage(response, "Failed to add watched movie"),
+    );
+  }
+
+  return response.json();
+}

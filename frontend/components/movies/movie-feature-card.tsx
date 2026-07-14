@@ -8,7 +8,12 @@ import { Star } from "lucide-react";
 import { Heart } from "lucide-react";
 import { CiPlay1 } from "react-icons/ci";
 import type { MovieDetail } from "@/types/movie";
-import { addFavorite, deleteFavorite, getUserByClerkId } from "@/lib/api/users";
+import {
+  addWatched,
+  addFavorite,
+  deleteFavorite,
+  getUserByClerkId,
+} from "@/lib/api/users";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
@@ -21,11 +26,6 @@ export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
   const { user, isLoaded } = useUser();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleWatch = () =>
-    movie.watchUrl
-      ? window.open(movie.watchUrl, "_blank", "noopener, noreferrer")
-      : toast.error("Sorry, no available resource");
 
   useEffect(() => {
     async function favoriteStatus() {
@@ -83,6 +83,40 @@ export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
     }
   }
 
+  async function handleWatch() {
+    if (!movie.watchUrl) {
+      toast.error("Sorry, no available resource");
+      return;
+    }
+
+    if (!isLoaded || !user) {
+      toast.error("Please sign in first");
+      return;
+    }
+
+    try {
+      const dbUser = await getUserByClerkId(user.id);
+
+      if (!dbUser) {
+        toast.error("User profile has not synced");
+        return;
+      }
+
+      await addWatched(dbUser.id, {
+        tmdbId: movie.id,
+        title: movie.title,
+        year: movie.year,
+        rating: movie.rating,
+        posterUrl: movie.posterUrl,
+        description: movie.description,
+      });
+
+      window.open(movie.watchUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update watched movies");
+    }
+  }
   return (
     <div className="grid grid-cols-2 gap-10 sm:grid-cols-[240px_1fr] md:grid-cols-[1fr_2fr] lg:grid-cols-[300px_1fr]">
       <div className="overflow-hidden rounded-2xl bg-zinc-900">
@@ -122,15 +156,13 @@ export function MovieFeatureCard({ movie }: MovieFeatureCardProps) {
         <p className="max-w-3xl">{movie.description}</p>
         <div className="flex gap-3">
           <Button
-            asChild
+            type="button"
             size="lg"
             className="rounded-4xl bg-white p-4 text-base font-semibold text-black"
             onClick={handleWatch}
           >
-            <Link href="#">
-              <CiPlay1 />
-              Watch
-            </Link>
+            <CiPlay1 />
+            Watch
           </Button>
 
           <Button
