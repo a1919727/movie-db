@@ -7,6 +7,7 @@ import {
   deleteReviewBodySchema,
   reviewsQuerySchema,
 } from "../schemas/review.schema.js";
+import { getMovieDetails } from "../services/tmdb.service.js";
 
 export async function getReviews(req: Request, res: Response) {
   const query = parseRequest(reviewsQuerySchema, req.query, res);
@@ -48,7 +49,26 @@ export async function getReviewsByUserId(req: Request, res: Response) {
       where: { userId: params.id },
       orderBy: { createdAt: "desc" },
     });
-    res.status(200).json(reviews);
+
+    const reviewsWithMovieTitle = await Promise.all(
+      reviews.map(async (review) => {
+        try {
+          const movie = await getMovieDetails(review.tmdbMovieId);
+
+          return {
+            ...review,
+            title: movie.title,
+          };
+        } catch {
+          return {
+            ...review,
+            title: `Movie ${review.tmdbMovieId}`,
+          };
+        }
+      }),
+    );
+
+    res.status(200).json(reviewsWithMovieTitle);
   } catch (error) {
     console.log(error);
     res.status(500).json({

@@ -14,6 +14,7 @@ import { Button } from "../ui/button";
 type ProfileTabsProps = {
   user: User;
   reviews: UserReview[];
+  onDeleteReview: (reviewId: number) => Promise<void> | void;
 };
 
 function mapMovieToMovieCard(movie: {
@@ -32,7 +33,11 @@ function mapMovieToMovieCard(movie: {
   };
 }
 
-export function ProfileTabs({ user, reviews }: ProfileTabsProps) {
+export function ProfileTabs({
+  user,
+  reviews,
+  onDeleteReview,
+}: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<"Watch" | "Review" | "Favorites">(
     "Watch",
   );
@@ -101,7 +106,9 @@ export function ProfileTabs({ user, reviews }: ProfileTabsProps) {
         <ProfileMovieCarousel href="/favorites" movies={favoriteMovies} />
       )}
 
-      {activeTab === "Review" && <ProfileReviewList reviews={reviews} />}
+      {activeTab === "Review" && (
+        <ProfileReviewList reviews={reviews} onDeleteReview={onDeleteReview} />
+      )}
     </section>
   );
 }

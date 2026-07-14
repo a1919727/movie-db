@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { getReviewsByUserId } from "@/lib/api/reviews";
+import { deleteReview, getReviewsByUserId } from "@/lib/api/reviews";
 import { getUserByClerkId } from "@/lib/api/users";
 import type { User } from "@/types/user";
 import type { UserReview } from "@/types/review";
 import { ProfileHeader } from "./profile-header";
 import { ProfileTabs } from "./profile-tabs";
+import { toast } from "sonner";
 
 export function ProfileClient() {
   const { user, isLoaded } = useUser();
@@ -60,10 +61,30 @@ export function ProfileClient() {
     );
   }
 
+  async function handleDeleteReview(reviewId: number) {
+    if (!dbUser) return;
+
+    try {
+      await deleteReview(reviewId, dbUser.id);
+      setReviews((currentReviews) =>
+        currentReviews.filter((review) => review.id !== reviewId),
+      );
+      toast.success("Review deleted.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete review",
+      );
+    }
+  }
+
   return (
     <>
       <ProfileHeader user={dbUser} />
-      <ProfileTabs user={dbUser} reviews={reviews} />
+      <ProfileTabs
+        user={dbUser}
+        reviews={reviews}
+        onDeleteReview={handleDeleteReview}
+      />
     </>
   );
 }
