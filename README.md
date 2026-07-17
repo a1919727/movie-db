@@ -1,17 +1,14 @@
-# Full Stack Movie Platform
+# Movie Review Platform
 
 A full stack movie platform for discovering movies, browsing movie details, saving favorites, tracking watch list, and writing reviews.
 
-## Highlights
+## Features
 
-- Browse popular movies and search titles with TMDB data
-- View movie details, cast information, and watch-provider links
-- Sign up and authenticate with Clerk
-- Create and sync user profiles
-- Save favorite movies
-- Track watched movies
-- Write and delete reviews
-- Upload and manage profile avatars with Cloudinary
+- Movie discovery and search with TMDB
+- Movie details, cast information, and watch-provider links
+- Authentication and profile sync with Clerk
+- Favorites, watched tracking, and reviews
+- Avatar upload and edit with Cloudinary
 
 ## Tech Stack
 
