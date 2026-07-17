@@ -48,9 +48,28 @@ backend/
   prisma/             Database schema and migrations
 ```
 
+## System Architecture
+
+```mermaid
+flowchart LR
+    F[Frontend<br/>Next.js<br/>Vercel]
+    B[Backend API<br/>Node.js / Express<br/>Railway]
+    D[(PostgreSQL)]
+    T[TMDB API]
+    C[Clerk Authentication]
+    M[Cloudinary]
+
+    F -->|REST API| B
+    F <--> |Authentication| C
+    B -->|SQL| D
+    B -->|Movie Data| T
+    B -->|Image Upload| M
+```
+
+
 ## Design Preview
 
-Designs were prototyped in Figma before implementation.
+Designs were prototyped in Figma before implementation. Some design references and visual assets were adapted from Figma Community resources and customized for this project.
 
 <img src="./docs/home-page-prototype.png" alt="Home Page Prototype" width="700" />
 
