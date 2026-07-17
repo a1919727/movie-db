@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { Pacifico } from "next/font/google";
 import { AuthControls } from "../auth/auth-controls";
+import { NavLink } from "./nav-link";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -11,7 +12,7 @@ const pacifico = Pacifico({
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Movies", href: "/movies" },
-  { label: "Favorites", href: "/favorites" },
+  { label: "Favorites", href: "/favorites", requiresAuth: true },
 ];
 
 export function Header() {
@@ -39,13 +40,12 @@ export function Header() {
         <div className="flex items-center justify-end gap-6">
           <nav className="hidden items-center gap-6 md:flex">
             {navLinks.map((link) => (
-              <Link
+              <NavLink
                 key={link.href}
                 href={link.href}
-                className="text-base font-medium text-foreground"
-              >
-                {link.label}
-              </Link>
+                label={link.label}
+                requiresAuth={link.requiresAuth}
+              />
             ))}
           </nav>
 
