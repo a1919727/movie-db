@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Star } from "lucide-react";
 import {
   Carousel,
@@ -29,7 +30,7 @@ export function HeroSection({ movies }: HeroSectionProps) {
                     : undefined
                 }
               >
-                <div className="relative flex min-h-[560px] flex-col justify-center p-6 md:p-10">
+                <div className="relative flex min-h-[560px] flex-col justify-end p-6 pb-20 md:p-10 md:pb-24">
                   <div className="max-w-3xl space-y-5">
                     <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
                       {movie.title}
@@ -43,15 +44,15 @@ export function HeroSection({ movies }: HeroSectionProps) {
                         {movie.rating.toFixed(1)}
                       </span>
                     </div>
-                    <p className="text-base">{movie.description}</p>
                   </div>
                   <div className="mt-4">
                     <Button
+                      asChild
                       variant="outline"
                       size="lg"
                       className="rounded-full border-white/20 bg-white/10 p-6 text-white hover:bg-white/20 text-base"
                     >
-                      View Details
+                      <Link href={`/movies/${movie.id}`}>View Details</Link>
                     </Button>
                   </div>
                 </div>
