@@ -41,19 +41,13 @@ backend/    Express API and Prisma schema
 
 Designs were prototyped in Figma before implementation.
 
-Recommended assets to include:
+![Home Page Prototype](./docs/home-page-prototype.png)
 
-- Home page wireframe or high-fidelity mockup
-- Movie detail page prototype
-- Profile page prototype
+![Movies Page Prototype](./docs/movies-page-prototype.png)
 
-Example README structure:
-
-```md
-## Design Preview
+![Search Result Prototype](./docs/search-result-prototype.png)
 
 Figma Prototype: https://www.figma.com/design/qANj437UhEpbQoy2F7C5m0/Movie.ai?node-id=0-1&t=1tfC5tjrs04VXD0z-1
-```
 
 ## Running Locally
 
