@@ -33,8 +33,19 @@ A full stack movie platform for discovering movies, browsing movie details, savi
 ## Project Structure
 
 ```text
-frontend/   Next.js application
-backend/    Express API and Prisma schema
+frontend/
+  app/                Next.js app router pages and layouts
+  components/         Reusable UI and feature components
+  lib/api/            Frontend API clients for backend requests
+  types/              Shared frontend TypeScript types
+
+backend/
+  src/controllers/    Request handlers for movies, users, and reviews
+  src/routes/         Express route definitions
+  src/services/       External service integrations and business logic
+  src/schemas/        Zod request validation schemas
+  src/lib/            Shared backend utilities such as Prisma client
+  prisma/             Database schema and migrations
 ```
 
 ## Design Preview
