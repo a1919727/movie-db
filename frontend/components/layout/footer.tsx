@@ -14,7 +14,7 @@ export function Footer() {
         {/* Left */}
         <div className="col-span-2">
           <Link href="/" className={`${pacifico.className} text-2xl`}>
-            Movie.ai
+            MovieDB
           </Link>
 
           <div className="flex flex-left gap-3 mt-3">
@@ -75,7 +75,7 @@ export function Footer() {
         </div>
       </div>
       <div className="text-center text-sm text-muted-foreground py-4">
-        © 2026 Movie.ai. All rights reserved.
+        © 2026 MovieDB. All rights reserved.
       </div>
     </footer>
   );

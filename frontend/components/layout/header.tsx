@@ -20,7 +20,7 @@ export function Header() {
       <div className="mx-auto grid h-16 max-w-7xl grid-cols-3 items-center px-2">
         {/* Logo */}
         <Link href="/" className={`${pacifico.className} text-2xl`}>
-          Movie.ai
+          MovieDB
         </Link>
 
         {/* Search */}
