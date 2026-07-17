@@ -41,11 +41,11 @@ backend/    Express API and Prisma schema
 
 Designs were prototyped in Figma before implementation.
 
-![Home Page Prototype](./docs/home-page-prototype.png)
+<img src="./docs/home-page-prototype.png" alt="Home Page Prototype" width="700" />
 
-![Movies Page Prototype](./docs/movies-page-prototype.png)
+<img src="./docs/movies-page-prototype.png" alt="Movies Page Prototype" width="700" />
 
-![Search Result Prototype](./docs/search-result-prototype.png)
+<img src="./docs/search-result-prototype.png" alt="Search Result Prototype" width="700" />
 
 Figma Prototype: https://www.figma.com/design/qANj437UhEpbQoy2F7C5m0/Movie.ai?node-id=0-1&t=1tfC5tjrs04VXD0z-1
 
