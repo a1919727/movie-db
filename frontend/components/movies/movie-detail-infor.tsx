@@ -22,7 +22,7 @@ export function MovieDetailInfor({
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
-      <div className="max-w-5xl">
+      <div className="max-w-6xl">
         <h1 className="mb-5 text-3xl font-semibold">Infomation</h1>
         <div className="grid grid-cols-2 gap-10">
           <div className="space-y-6">
