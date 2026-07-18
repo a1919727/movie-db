@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { FaTrash } from "react-icons/fa";
 import type { UserReview } from "@/types/review";
 import { Button } from "../ui/button";
@@ -8,6 +9,7 @@ import { Button } from "../ui/button";
 type ProfileReviewListProps = {
   reviews: UserReview[];
   onDeleteReview: (reviewId: number) => Promise<void> | void;
+  viewAllHref?: string;
 };
 
 function formatReviewDate(date: string) {
@@ -20,6 +22,7 @@ function formatReviewDate(date: string) {
 export function ProfileReviewList({
   reviews,
   onDeleteReview,
+  viewAllHref,
 }: ProfileReviewListProps) {
   const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
 
@@ -42,7 +45,7 @@ export function ProfileReviewList({
       {reviews.map((review) => (
         <div key={review.id} className="rounded-2xl bg-zinc-900 p-5 text-white">
           <div className="mb-3 flex items-start justify-between gap-4">
-            <div className="flex justify-between items-center flex-1">
+            <div className="flex flex-1 items-center justify-between">
               <h3 className="text-xl font-semibold">{review.title}</h3>
               <span className="text-sm text-zinc-400">
                 {formatReviewDate(review.createdAt)}
@@ -65,6 +68,11 @@ export function ProfileReviewList({
           </div>
         </div>
       ))}
+      {viewAllHref ? (
+        <div className="mt-5 flex justify-end">
+          <Link href={viewAllHref}>View All</Link>
+        </div>
+      ) : null}
     </div>
   );
 }

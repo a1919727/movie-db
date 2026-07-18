@@ -107,7 +107,11 @@ export function ProfileTabs({
       )}
 
       {activeTab === "Review" && (
-        <ProfileReviewList reviews={reviews} onDeleteReview={onDeleteReview} />
+        <ProfileReviewList
+          reviews={reviews}
+          onDeleteReview={onDeleteReview}
+          viewAllHref="/reviews"
+        />
       )}
     </section>
   );
