@@ -30,6 +30,11 @@ type DiscoverMoviesParams = {
   page?: number;
 };
 
+type SearchMoviesParams = {
+  query: string;
+  page?: number;
+};
+
 type TmdbMovieDetailResponse = TmdbMovie & {
   genres?: Array<{ id: number; name: string }>;
   origin_country?: string[];
@@ -53,6 +58,13 @@ type TmdbMovieDetailResponse = TmdbMovie & {
 export type MoviesResponse = {
   page: number;
   results: HeroMovie[];
+  total_pages: number;
+  total_results: number;
+};
+
+export type SearchMoviesResponse = {
+  page: number;
+  results: MovieDetail[];
   total_pages: number;
   total_results: number;
 };
@@ -134,6 +146,43 @@ export async function discoverMovies({
   const data: TmdbMovieListResponse = await response.json();
 
   return mapMoviesResponse(data);
+}
+
+export async function searchMovies({
+  query,
+  page = 1,
+}: SearchMoviesParams): Promise<SearchMoviesResponse> {
+  const params = new URLSearchParams({
+    query,
+    page: String(page),
+  });
+
+  const response = await fetchFromApi(`/movies/search?${params.toString()}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, "Failed to search movies"));
+  }
+
+  const data: TmdbMovieListResponse = await response.json();
+
+  return {
+    page: data.page,
+    total_pages: data.total_pages,
+    total_results: data.total_results,
+    results: data.results.map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      year: Number(movie.release_date?.slice(0, 4)) || 0,
+      rating: movie.vote_average,
+      posterUrl: movie.poster_path
+        ? `${TMDB_POSTER_BASE_URL}${movie.poster_path}`
+        : "",
+      description: movie.overview,
+      genres: [],
+    })),
+  };
 }
 
 export async function getMovieDetails(

@@ -13,6 +13,7 @@ type MoviePaginationProps = {
   totalPages: number;
   searchParams?: {
     genre?: string;
+    query?: string;
     rating?: string;
     year?: string;
   };
@@ -34,6 +35,7 @@ export function MoviePagination({
     const params = new URLSearchParams();
 
     if (searchParams?.genre) params.set("genre", searchParams.genre);
+    if (searchParams?.query) params.set("query", searchParams.query);
     if (searchParams?.year) params.set("year", searchParams.year);
     if (searchParams?.rating) params.set("rating", searchParams.rating);
     params.set("page", String(page));
