@@ -69,7 +69,12 @@ export function AuthControls() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button
+          data-testid="user-menu-trigger"
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+        >
           <Avatar>
             <AvatarImage src={avatarUrl} alt={`${displayName} avatar`} />
             <AvatarFallback>{initial}</AvatarFallback>
@@ -88,7 +93,10 @@ export function AuthControls() {
         <DropdownMenuSeparator />
 
         <SignOutButton>
-          <DropdownMenuItem className="flex items-center gap-2">
+          <DropdownMenuItem
+            data-testid="logout-menu-item"
+            className="flex items-center gap-2"
+          >
             <LogOutIcon className="h-4 w-4" />
             Log out
           </DropdownMenuItem>
