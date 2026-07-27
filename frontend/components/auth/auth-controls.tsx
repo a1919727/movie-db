@@ -84,7 +84,11 @@ export function AuthControls() {
 
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center gap-2">
+          <Link
+            href="/profile"
+            className="flex items-center gap-2"
+            data-testid="profile-menu-item"
+          >
             <UserIcon className="h-4 w-4" />
             Profile
           </Link>
