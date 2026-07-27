@@ -26,6 +26,7 @@ A full stack movie platform for discovering movies, browsing movie details, savi
 - Figma
 - Vercel
 - Railway
+- Cypress
 
 ## Project Structure
 
@@ -62,7 +63,6 @@ flowchart LR
     B -->|Movie Data| T
     B -->|Image Upload| M
 ```
-
 
 ## Design Preview
 
@@ -110,6 +110,65 @@ The project expects environment variables for the frontend and backend services.
 - `TMDB_API_KEY`
 - `CORS_ORIGIN`
 - Cloudinary configuration
+
+## Cypress Testing
+
+Frontend E2E tests are written with Cypress and should be run from the `frontend` app.
+
+### Test Environment Setup
+
+Create `frontend/.env.e2e` for the Cypress test environment. This file should use the Clerk test application keys instead of the normal development keys.
+
+Example:
+
+```bash
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
+CLERK_SECRET_KEY=sk_test_xxx
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+```
+
+If a test uses a fixed test account, add credentials in `frontend/cypress.env.json`.
+
+Example:
+
+```json
+{
+  "USER_EMAIL": "movieai+clerk_test@example.com",
+  "USER_PASSWORD": "TestPassword123!"
+}
+```
+
+### Run Cypress Locally
+
+Start the backend:
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Start the frontend with the E2E environment:
+
+```bash
+cd frontend
+npm install
+npm run dev:e2e
+```
+
+Open Cypress with the E2E environment:
+
+```bash
+cd frontend
+npm run cypress:open:e2e
+```
+
+Run Cypress headlessly:
+
+```bash
+cd frontend
+npm run cypress:run:e2e
+```
 
 ## Deployment
 
