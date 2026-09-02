@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import {
   Carousel,
   CarouselContent,
@@ -11,11 +13,22 @@ import {
 } from "@/components/ui/carousel";
 import type { HeroMovie } from "@/types/movie";
 import { Button } from "../ui/button";
+import { RequireAuthDialog } from "../ui/require-auth-dialog";
 
 type HeroSectionProps = {
   movies: HeroMovie[];
 };
 export function HeroSection({ movies }: HeroSectionProps) {
+  const { isSignedIn } = useAuth();
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+
+  function handleViewDetailsClick(event: React.MouseEvent) {
+    if (!isSignedIn) {
+      event.preventDefault();
+      setShowAuthDialog(true);
+    }
+  }
+
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
       <Carousel className="w-full">
@@ -52,7 +65,12 @@ export function HeroSection({ movies }: HeroSectionProps) {
                       size="lg"
                       className="rounded-full border-white/20 bg-white/10 p-6 text-white hover:bg-white/20 text-base"
                     >
-                      <Link href={`/movies/${movie.id}`}>View Details</Link>
+                      <Link
+                        href={`/movies/${movie.id}`}
+                        onClick={handleViewDetailsClick}
+                      >
+                        View Details
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -63,6 +81,10 @@ export function HeroSection({ movies }: HeroSectionProps) {
         <CarouselPrevious className="left-auto right-20 top-auto bottom-10 translate-y-0 border-white/20 text-white hover:bg-black/65 disabled:opacity-50 md:bottom-14" />
         <CarouselNext className="left-auto right-6 top-auto bottom-10 translate-y-0 border-white/20 text-white hover:bg-black/65 disabled:opacity-50 md:bottom-14" />
       </Carousel>
+      <RequireAuthDialog
+        open={showAuthDialog}
+        onOpenChange={setShowAuthDialog}
+      />
     </section>
   );
 }
