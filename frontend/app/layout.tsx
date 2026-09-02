@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Movie AI",
-  description: "Movie AI app",
+  title: "Movie DB",
+  description: "Movie discovery & review platform",
 };
 
 export default function RootLayout({
