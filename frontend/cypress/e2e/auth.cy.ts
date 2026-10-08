@@ -28,8 +28,9 @@ describe("auth page", () => {
           "testmovieai@1123",
         );
         cy.contains("button", "Sign up").click();
-        cy.contains("Verify your email").should("be.visible");
-        cy.get('input[name="verificationCode"]').type("424242");
+        cy.get('input[name="verificationCode"]')
+          .should("be.visible")
+          .type("424242");
         cy.contains("button", "Verify email").click();
       },
     );
