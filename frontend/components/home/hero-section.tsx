@@ -48,8 +48,8 @@ export function HeroSection({ movies }: HeroSectionProps) {
                     className="object-cover object-center"
                   />
                 )}
-                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
-                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-transparent" />
+                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
+                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-background/50 via-black/5 to-transparent" />
                 <div className="relative mx-auto flex min-h-[520px] w-full max-w-7xl flex-col justify-end px-4 pb-28 pt-16 sm:min-h-[600px] sm:px-6 md:min-h-[640px] md:pb-32 lg:min-h-[min(760px,85svh)] lg:px-8">
                   <div className="max-w-2xl space-y-5">
                     <h2 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
