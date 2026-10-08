@@ -19,7 +19,7 @@ const navLinks = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur">
-      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 px-4 py-5 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 px-4 py-3 lg:grid-cols-[1fr_auto_1fr]">
         {/* Logo */}
         <Link href="/" className={`${pacifico.className} text-2xl`}>
           MovieDB
