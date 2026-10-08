@@ -11,7 +11,7 @@ export default async function Home() {
     });
 
   const heroMovies = movies.slice(0, 5);
-  const popularMovies = movies.slice(0, 4);
+  const popularMovies = movies.slice(0, 8);
 
   return (
     <>
