@@ -28,7 +28,7 @@ export function MovieCard({ movie }: MovieCardProps) {
   return (
     <>
       <Link href={`/movies/${movie.id}`} className="block" onClick={handleClick}>
-        <Card className="group overflow-hidden border-white/10 bg-zinc-950 text-white transition hover:-translate-y-1 hover:border-white/20">
+        <Card className="group overflow-hidden border-border bg-card text-card-foreground transition hover:-translate-y-1 hover:border-foreground/20">
           <div className="aspect-[4/5] overflow-hidden bg-zinc-900">
             {hasPoster ? (
               <Image
@@ -53,7 +53,7 @@ export function MovieCard({ movie }: MovieCardProps) {
                 </h3>
               </div>
               <div className="flex justify-between">
-                <p className="text-sm text-zinc-400">{movie.year}</p>
+                <p className="text-sm text-muted-foreground">{movie.year}</p>
                 <span className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
                   {movie.rating.toFixed(1)}

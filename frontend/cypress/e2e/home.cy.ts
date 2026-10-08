@@ -1,11 +1,28 @@
 describe("home page", () => {
+  it("switches themes and remembers the selection after a reload", () => {
+    cy.visit("/", {
+      onBeforeLoad(win) {
+        win.localStorage.setItem("moviedb-theme", "dark");
+      },
+    });
+    cy.get('[data-cy="theme-toggle"]').should("have.attr", "aria-pressed", "true").click();
+    cy.get("html").should("not.have.class", "dark");
+    cy.get('[data-cy="theme-toggle"]').should("have.attr", "aria-pressed", "false");
+    cy.reload();
+    cy.get("html").should("not.have.class", "dark");
+    cy.get('[data-cy="theme-toggle"]').should("have.attr", "aria-pressed", "false").click();
+    cy.get("html").should("have.class", "dark");
+    cy.get('[data-cy="theme-toggle"]').should("have.attr", "aria-pressed", "true");
+  });
+
   it("loads the homepage with global navigation", () => {
     cy.visit("/");
 
     cy.contains("MovieDB").should("be.visible");
     cy.contains("Home").should("be.visible");
     cy.contains("Movies").should("be.visible");
-    cy.get('input[placeholder="Search movies..."]').should("be.visible");
+    cy.get('button[aria-label="Open movie search"]').should("be.visible");
+    cy.get('input[placeholder="Search movies..."]').should("not.exist");
   });
 
   it("navigates to the movies page from the header", () => {
@@ -17,10 +34,10 @@ describe("home page", () => {
     cy.contains("Movie Library").should("be.visible");
   });
 
-  it("shows the sign-in prompt when an unauthenticated user clicks Favorites", () => {
+  it("shows the sign-in prompt when an unauthenticated user clicks My Library", () => {
     cy.visit("/");
 
-    cy.contains("Favorites").click();
+    cy.get('header nav').contains("My Library").click();
 
     cy.url().should("not.include", "/favorites");
     cy.contains("Sign in required").should("be.visible");

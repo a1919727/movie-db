@@ -3,6 +3,7 @@ import { Pacifico } from "next/font/google";
 import { AuthControls } from "../auth/auth-controls";
 import { NavLink } from "./nav-link";
 import { SearchForm } from "./search-form";
+import { ThemeToggle } from "./theme-toggle";
 
 const pacifico = Pacifico({
   subsets: ["latin"],
@@ -12,26 +13,19 @@ const pacifico = Pacifico({
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Movies", href: "/movies" },
-  { label: "Favorites", href: "/favorites", requiresAuth: true },
+  { label: "My Library", href: "/favorites", requiresAuth: true },
 ];
 
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur">
-      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-3 items-center px-2 py-5">
+      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 px-4 py-5 lg:grid-cols-[1fr_auto_1fr]">
         {/* Logo */}
         <Link href="/" className={`${pacifico.className} text-2xl`}>
           MovieDB
         </Link>
 
-        {/* Search */}
-        <div className="flex justify-center">
-          <SearchForm />
-        </div>
-
-        {/* Navigation & Avatar */}
-        <div className="flex items-center justify-end gap-6">
-          <nav className="hidden items-center gap-6 md:flex">
+        <nav className="col-span-2 row-start-2 flex items-center justify-center gap-8 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:gap-14">
             {navLinks.map((link) => (
               <NavLink
                 key={link.href}
@@ -40,8 +34,11 @@ export function Header() {
                 requiresAuth={link.requiresAuth}
               />
             ))}
-          </nav>
+        </nav>
 
+        <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-1 sm:gap-2 lg:col-start-3">
+          <SearchForm />
+          <ThemeToggle />
           <AuthControls />
         </div>
       </div>
