@@ -54,7 +54,7 @@ export function AuthControls() {
         <Button
           asChild
           variant="outline"
-          className="bg-black text-white hover:bg-black hover:text-white"
+          className="rounded-full border-border bg-background text-foreground hover:bg-foreground/10 hover:text-foreground"
         >
           <Link href="/login">Sign in</Link>
         </Button>

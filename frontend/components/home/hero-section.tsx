@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Star } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import {
   Carousel,
@@ -30,46 +31,58 @@ export function HeroSection({ movies }: HeroSectionProps) {
   }
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
+    <section className="w-full overflow-hidden">
+      <h1 className="sr-only">Discover featured movies</h1>
       <Carousel className="w-full">
-        <CarouselContent>
-          {movies.map((movie) => (
-            <CarouselItem key={movie.id}>
-              <div
-                className="relative min-h-[560px] overflow-hidden rounded-[32px] bg-zinc-900 bg-cover bg-center bg-no-repeat"
-                style={
-                  movie.posterUrl
-                    ? { backgroundImage: `url(${movie.posterUrl})` }
-                    : undefined
-                }
-              >
-                <div className="relative flex min-h-[560px] flex-col justify-end p-6 pb-20 md:p-10 md:pb-24">
-                  <div className="max-w-3xl space-y-5">
-                    <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
+        <CarouselContent className="ml-0">
+          {movies.map((movie, index) => (
+            <CarouselItem key={movie.id} className="pl-0">
+              <div className="relative overflow-hidden bg-zinc-900">
+                {(movie.backdropUrl || movie.posterUrl) && (
+                  <Image
+                    src={movie.backdropUrl || movie.posterUrl}
+                    alt=""
+                    fill
+                    priority={index === 0}
+                    sizes="100vw"
+                    className="object-cover object-center"
+                  />
+                )}
+                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
+                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-background/50 via-black/5 to-transparent" />
+                <div className="relative mx-auto flex min-h-[520px] w-full max-w-7xl flex-col justify-end px-4 pb-28 pt-16 sm:min-h-[600px] sm:px-6 md:min-h-[640px] md:pb-32 lg:min-h-[min(760px,85svh)] lg:px-8">
+                  <div className="max-w-2xl space-y-5">
+                    <h2 className="text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
                       {movie.title}
-                    </h1>
+                    </h2>
 
                     <div className="flex flex-wrap items-center gap-3 text-base text-white/75">
-                      <span>{movie.year}</span>
-                      <span>•</span>
+                      {movie.year > 0 && <><span>{movie.year}</span><span aria-hidden="true">•</span></>}
                       <span className="flex items-center gap-1">
                         <Star className="h-4 w-4 fill-amber-300 text-amber-300" />
                         {movie.rating.toFixed(1)}
+                        <span className="text-sm text-white/60">/ 10 · TMDB</span>
                       </span>
                     </div>
+                    {movie.description && (
+                      <p className="line-clamp-3 max-w-xl text-sm leading-7 text-white/80 sm:text-base">
+                        {movie.description}
+                      </p>
+                    )}
                   </div>
-                  <div className="mt-4">
+                  <div className="mt-7">
                     <Button
                       asChild
                       variant="outline"
                       size="lg"
-                      className="rounded-full border-white/20 bg-white/10 p-6 text-white hover:bg-white/20 text-base"
+                      className="min-h-12 rounded-full border-white/25 bg-white/10 px-6 text-base text-white backdrop-blur-sm hover:bg-white/20 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-200"
                     >
                       <Link
                         href={`/movies/${movie.id}`}
                         onClick={handleViewDetailsClick}
                       >
                         View Details
+                        <ArrowRight aria-hidden="true" className="size-4" />
                       </Link>
                     </Button>
                   </div>
@@ -78,8 +91,10 @@ export function HeroSection({ movies }: HeroSectionProps) {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-auto right-20 top-auto bottom-10 translate-y-0 border-white/20 text-white hover:bg-black/65 disabled:opacity-50 md:bottom-14" />
-        <CarouselNext className="left-auto right-6 top-auto bottom-10 translate-y-0 border-white/20 text-white hover:bg-black/65 disabled:opacity-50 md:bottom-14" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-7 mx-auto h-11 max-w-7xl">
+          <CarouselPrevious size="icon" className="pointer-events-auto bottom-0 left-auto right-18 top-auto my-0 border-white/20 bg-black/30 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white disabled:opacity-30 sm:right-20 lg:right-22" />
+          <CarouselNext size="icon" className="pointer-events-auto bottom-0 left-auto right-4 top-auto my-0 border-white/20 bg-black/30 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white disabled:opacity-30 sm:right-6 lg:right-8" />
+        </div>
       </Carousel>
       <RequireAuthDialog
         open={showAuthDialog}
