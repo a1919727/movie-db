@@ -78,21 +78,21 @@ Figma Prototype: https://www.figma.com/design/qANj437UhEpbQoy2F7C5m0/Movie.ai?no
 
 ## Running Locally
 
-### Frontend
+From the project root (`movie-db`), install dependencies once:
 
 ```bash
-cd frontend
 npm install
+npm --prefix frontend install
+npm --prefix backend install
+```
+
+Start both the frontend and backend together:
+
+```bash
 npm run dev
 ```
 
-### Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
+Press `Ctrl+C` to stop both services. To start only one service from the project root, use `npm run dev:frontend` or `npm run dev:backend`.
 
 ## Environment Variables
 

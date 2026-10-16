@@ -1,0 +1,12 @@
+{
+  "name": "movie-db",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others --names frontend,backend \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
