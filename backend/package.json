@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "sync:movies": "node --import tsx scripts/sync-movies.ts",
+    "check:scripts": "tsc --project tsconfig.scripts.json",
+    "test:sync-movies": "node --import tsx --test scripts/sync-movies.test.ts"
   },
   "keywords": [],
   "author": "",

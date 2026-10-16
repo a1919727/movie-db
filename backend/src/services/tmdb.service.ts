@@ -33,8 +33,21 @@ type TmdbCreditMember = {
   order: number;
 };
 
+type TmdbCrewMember = {
+  id: number;
+  name: string;
+  job: string;
+};
+
 type TmdbCredits = {
   cast: TmdbCreditMember[];
+  crew: TmdbCrewMember[];
+};
+
+export type TmdbMovieMetadata = Omit<TmdbMovie, "genres" | "runtime"> & {
+  genres: TmdbGenre[];
+  runtime: number | null;
+  credits: TmdbCredits;
 };
 
 type TmdbWatchProviderRegion = {
@@ -59,6 +72,7 @@ function getTmdbApiKey() {
 async function fetchTmdbData<T>(
   path: string,
   searchParams?: Record<string, string | number | undefined>,
+  signal?: AbortSignal,
 ) {
   const tmdbApiKey = getTmdbApiKey();
 
@@ -73,21 +87,54 @@ async function fetchTmdbData<T>(
     }
   });
 
-  const response = await fetch(`${TMDB_BASE_URL}${path}?${params.toString()}`);
+  let response: Response;
 
-  if (!response.ok) {
-    throw new Error(`Failed TMDB request: ${response.status}`);
+  try {
+    response = await fetch(`${TMDB_BASE_URL}${path}?${params.toString()}`, {
+      signal: signal ?? null,
+    });
+  } catch {
+    // Avoid exposing URLs containing the API key in network error messages.
+    const error = new Error(
+      signal?.aborted
+        ? `TMDB request aborted: ${path}`
+        : `Unable to reach TMDB: ${path}`,
+    );
+
+    if (signal?.aborted) {
+      error.name = "AbortError";
+    }
+
+    throw error;
   }
 
-  return response.json() as Promise<T>;
+  if (!response.ok) {
+    throw new Error(`Failed TMDB request (${path}): HTTP ${response.status}`);
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch {
+    const error = new Error(
+      signal?.aborted
+        ? `TMDB request aborted: ${path}`
+        : `Invalid JSON response from TMDB: ${path}`,
+    );
+
+    if (signal?.aborted) {
+      error.name = "AbortError";
+    }
+
+    throw error;
+  }
 }
 
 export async function getNowPlayingMovies(page = 1) {
   return fetchTmdbData<TmdbMovieList>("/movie/now_playing", { page });
 }
 
-export async function getPopularMovies(page = 1) {
-  return fetchTmdbData<TmdbMovieList>("/movie/popular", { page });
+export async function getPopularMovies(page = 1, signal?: AbortSignal) {
+  return fetchTmdbData<TmdbMovieList>("/movie/popular", { page }, signal);
 }
 
 export async function searchMovies(query: string, page = 1) {
@@ -111,11 +158,20 @@ export async function discoverMovies(params: {
   });
 }
 
+export async function getMovieMetadata(
+  id: string | number,
+  signal?: AbortSignal,
+) {
+  return fetchTmdbData<TmdbMovieMetadata>(
+    `/movie/${id}`,
+    { append_to_response: "credits" },
+    signal,
+  );
+}
+
 export async function getMovieDetails(id: string | number) {
   const [detail, watchProviders] = await Promise.all([
-    fetchTmdbData<TmdbMovie & { credits: TmdbCredits }>(`/movie/${id}`, {
-      append_to_response: "credits",
-    }),
+    getMovieMetadata(id),
     fetchTmdbData<TmdbWatchProvidersResponse>(`/movie/${id}/watch/providers`),
   ]);
 
