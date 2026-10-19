@@ -1,4 +1,9 @@
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+const TMDB_POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
+
+export function getTmdbPosterUrl(posterPath: string | null | undefined): string | null {
+  return posterPath ? `${TMDB_POSTER_BASE_URL}${posterPath}` : null;
+}
 
 type TmdbGenre = {
   id: number;
