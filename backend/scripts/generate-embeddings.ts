@@ -47,10 +47,24 @@ export async function generateEmbeddings(
   const pending = await dependencies.findPending(options.limit, options.model);
   let saved = 0;
   let changed = 0;
+  let skippedInvalid = 0;
 
   for (const [index, document] of pending.entries()) {
     if (index > 0 && options.delayMs > 0) await dependencies.wait(options.delayMs);
-    const vector = await dependencies.embed({ title: document.title, content: document.content });
+    let vector: number[];
+
+    try {
+      vector = await dependencies.embed({ title: document.title, content: document.content });
+    } catch (error: unknown) {
+      if (!(error instanceof EmbeddingError) || error.kind !== "invalid-input") {
+        throw error;
+      }
+
+      skippedInvalid += 1;
+      dependencies.log(`[${index + 1}/${pending.length}] Skipped document ${document.id}: ${error.message}`);
+      continue;
+    }
+
     vectorLiteral(vector);
     if (await dependencies.save(document, vector, options.model)) {
       saved += 1;
@@ -61,7 +75,7 @@ export async function generateEmbeddings(
     }
   }
 
-  return { pending: pending.length, saved, changed };
+  return { pending: pending.length, saved, changed, skippedInvalid };
 }
 
 async function main() {
@@ -103,7 +117,7 @@ async function main() {
       wait: delay,
       log: console.log,
     });
-    console.log(`Completed: ${result.saved} saved; ${result.changed} changed during generation. Current vectors were skipped.`);
+    console.log(`Completed: ${result.saved} saved; ${result.changed} changed during generation; ${result.skippedInvalid} skipped due to invalid input. Current vectors were skipped.`);
   } finally {
     await prisma.$disconnect();
   }
