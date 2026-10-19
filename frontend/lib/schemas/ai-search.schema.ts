@@ -18,6 +18,7 @@ export const aiMovieSchema = z.object({
   genres: z.array(z.string()),
   runtime: z.number().int().nullable(),
   posterUrl: z.string().nullable().optional(),
+  reason: z.string().trim().min(1).max(400).optional(),
 }).strip();
 
 export const aiSearchResponseSchema = z.object({

@@ -32,7 +32,7 @@ export function AiSearchResults({ query }: AiSearchResultsProps) {
 
     const controller = new AbortController();
     let active = true;
-    const timeout = window.setTimeout(() => controller.abort(), 15_000);
+    const timeout = window.setTimeout(() => controller.abort(), 40_000);
 
     void fetchAiMovies(trimmedQuery, { signal: controller.signal })
       .then((data) => {

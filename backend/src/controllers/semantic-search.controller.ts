@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { semanticSearchQuerySchema } from "../schemas/semantic-search.schema.js";
 import { EmbeddingError } from "../services/embedding.service.js";
+import { RecommendationError } from "../services/recommendation.service.js";
 import { searchMoviesByMeaning, SemanticSearchError } from "../services/semantic-search.service.js";
 import { parseRequest } from "../utils/validation.js";
 
@@ -13,6 +14,16 @@ export async function semanticSearchHandler(req: Request, res: Response) {
   } catch (error) {
     if (error instanceof SemanticSearchError) {
       res.status(503).json({ code: error.code, message: error.message });
+      return;
+    }
+
+    if (error instanceof RecommendationError) {
+      res.status(503).json({
+        code: error.kind === "notconfigured" ? "NOT_CONFIGURED" : "SEARCH_UNAVAILABLE",
+        message: error.kind === "notconfigured"
+          ? "AI movie recommendations are not configured yet."
+          : "AI movie recommendations are temporarily unavailable. Please try again later.",
+      });
       return;
     }
 

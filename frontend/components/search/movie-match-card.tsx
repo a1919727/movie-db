@@ -43,7 +43,7 @@ export function MovieMatchCard({ movie }: { movie: AiMovie }) {
           {movie.year !== null ? <span>{movie.year}</span> : null}
           {movie.rating !== null ? (
             <span className="inline-flex items-center gap-1">
-              <Star aria-hidden="true" className="size-3.5" />
+              <Star aria-hidden="true" className="size-3.5 fill-amber-300 text-amber-300" />
               <span className="sr-only">Rating </span>
               {movie.rating.toFixed(1)}/10
             </span>
@@ -55,9 +55,12 @@ export function MovieMatchCard({ movie }: { movie: AiMovie }) {
         {movie.genres.length > 0 ? (
           <p className="text-xs text-muted-foreground">{movie.genres.join(" · ")}</p>
         ) : null}
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {movie.overview || "No synopsis available."}
-        </p>
+        {movie.reason ? (
+          <div className="space-y-1 border-t border-border pt-3">
+            <h3 className="text-sm font-medium">Recommended reason</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">{movie.reason}</p>
+          </div>
+        ) : null}
       </div>
     </article>
   );

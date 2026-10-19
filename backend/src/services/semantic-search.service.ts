@@ -1,20 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
-import {
-  embedSearchQuery,
-  getEmbeddingConfig,
-} from "./embedding.service.js";
-
-export type SemanticMovie = {
-  tmdbId: number;
-  title: string;
-  posterUrl: string | null;
-  overview: string | null;
-  year: number | null;
-  rating: number | null;
-  genres: string[];
-  runtime: number | null;
-};
+import { embedSearchQuery, getEmbeddingConfig} from "./embedding.service.js";
+import { generateMovieRecommendations, getRecommendationConfig } from "./recommendation.service.js";
+import type { RecommendedMovie, SemanticMovie } from "../types/semantic-search.js";
 
 export class SemanticSearchError extends Error {
   constructor(
@@ -28,8 +16,9 @@ export class SemanticSearchError extends Error {
 
 export async function searchMoviesByMeaning(
   query: string,
-): Promise<{ results: SemanticMovie[] }> {
+): Promise<{ results: RecommendedMovie[] }> {
   const config = getEmbeddingConfig();
+  getRecommendationConfig();
   const embeddingModel = `${config.provider}:${config.model}`;
   const availability = await prisma.$queryRaw<Array<{ ready: boolean }>>(
     Prisma.sql`
@@ -82,5 +71,7 @@ export async function searchMoviesByMeaning(
     LIMIT ${10}
   `);
 
-  return { results };
+  const recommendations = await generateMovieRecommendations(query, results);
+
+  return { results: recommendations };
 }

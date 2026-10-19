@@ -5,7 +5,7 @@ export function LoadingMatches() {
     <div className="space-y-5">
       <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
         <LoaderCircle aria-hidden="true" className="size-4 animate-spin motion-reduce:animate-none" />
-        Finding movies for your description…
+        Finding movies and preparing recommendations…
       </p>
       <div aria-hidden="true" className="grid gap-4 lg:grid-cols-2">
         {Array.from({ length: 4 }, (_, index) => (
