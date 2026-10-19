@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type KeyboardEvent, type MouseEvent } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import type { MovieDetail } from "@/types/movie";
@@ -32,6 +32,27 @@ export function SearchResultCard({ movie }: SearchResultCardProps) {
     router.push(`/movies/${movie.id}`);
   }
 
+  function handleCardClick(event: MouseEvent<HTMLDivElement>) {
+    if (isInteractiveElementClick(event.target)) {
+      return;
+    }
+
+    handleOpenDetails();
+  }
+
+  function handleCardKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    if (isInteractiveElementClick(event.target)) {
+      return;
+    }
+
+    event.preventDefault();
+    handleOpenDetails();
+  }
+
   return (
     <>
       <section className="mx-auto w-full max-w-7xl px-4 py-6 md:py-8">
@@ -39,25 +60,8 @@ export function SearchResultCard({ movie }: SearchResultCardProps) {
           role="button"
           tabIndex={0}
           className="cursor-pointer rounded-3xl transition hover:bg-white/3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
-          onClick={(event) => {
-            if (isInteractiveElementClick(event.target)) {
-              return;
-            }
-
-            handleOpenDetails();
-          }}
-          onKeyDown={(event) => {
-            if (event.key !== "Enter" && event.key !== " ") {
-              return;
-            }
-
-            if (isInteractiveElementClick(event.target)) {
-              return;
-            }
-
-            event.preventDefault();
-            handleOpenDetails();
-          }}
+          onClick={handleCardClick}
+          onKeyDown={handleCardKeyDown}
         >
           <MovieFeatureCard movie={movie} />
         </div>
