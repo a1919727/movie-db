@@ -121,7 +121,6 @@ export function AiSearchDialog({ initialQuery = "", trigger }: AiSearchDialogPro
                         textareaRef.current?.focus();
                       }}
                     >
-                      <X aria-hidden="true" className="size-3.5" />
                     </button>
                   )}
                   <span className="tabular-nums" aria-label={`${description.length} of ${AI_SEARCH_MAX_LENGTH} characters`}>
