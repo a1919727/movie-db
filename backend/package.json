@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "sync:movies": "node --import tsx scripts/sync-movies.ts",
+    "generate:embeddings": "node --import tsx scripts/generate-embeddings.ts",
     "check:scripts": "tsc --project tsconfig.scripts.json",
     "test:sync-movies": "node --import tsx --test scripts/sync-movies.test.ts"
   },
@@ -16,6 +17,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^2.30.0",
     "@prisma/client": "^6.19.3",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",

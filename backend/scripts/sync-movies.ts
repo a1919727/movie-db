@@ -7,35 +7,13 @@ import { config } from "dotenv";
 import {
   getMovieMetadata,
   getPopularMovies,
+  getTmdbPosterUrl,
   type TmdbMovieMetadata,
 } from "../src/services/tmdb.service.js";
+import type { MovieDocumentData, SyncDependencies } from "./types/sync-movies.js";
 
 const MAX_TMDB_PAGE = 500;
 const REQUEST_TIMEOUT_MS = 15_000;
-
-export type MovieDocumentData = {
-  tmdbId: number;
-  title: string;
-  overview: string | null;
-  year: number | null;
-  rating: number | null;
-  genres: string[];
-  runtime: number | null;
-  content: string;
-  contentHash: string;
-  syncedAt: Date;
-};
-
-export type SyncDependencies = {
-  getPopularMovies: typeof getPopularMovies;
-  getMovieMetadata: typeof getMovieMetadata;
-  upsertMovieDocument: (args: {
-    where: { tmdbId: number };
-    create: MovieDocumentData;
-    update: MovieDocumentData;
-  }) => Promise<unknown>;
-  log: (message: string) => void;
-};
 
 export function parseOptions(args: string[]) {
   const { values } = parseArgs({
@@ -101,6 +79,7 @@ export function buildMovieDocument(movie: TmdbMovieMetadata): MovieDocumentData 
   return {
     tmdbId: movie.id,
     title,
+    posterUrl: getTmdbPosterUrl(movie.poster_path),
     overview,
     year,
     rating,
