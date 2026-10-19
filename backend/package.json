@@ -6,18 +6,24 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "sync:movies": "node --import tsx scripts/sync-movies.ts",
+    "generate:embeddings": "node --import tsx scripts/generate-embeddings.ts",
+    "check:scripts": "tsc --project tsconfig.scripts.json",
+    "test:sync-movies": "node --import tsx --test scripts/sync-movies.test.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^2.30.0",
     "@prisma/client": "^6.19.3",
     "cloudinary": "^2.10.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.1",
     "multer": "^2.2.0",
     "pg": "^8.22.0",
     "prisma": "^6.19.3",

@@ -1,0 +1,1 @@
+ALTER TABLE "MovieDocument" ADD COLUMN IF NOT EXISTS "posterUrl" TEXT;

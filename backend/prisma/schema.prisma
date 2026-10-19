@@ -47,6 +47,26 @@ model Movie {
   watchedBy   WatchedMovie[]
 }
 
+model MovieDocument {
+  id          Int      @id @default(autoincrement())
+  tmdbId      Int      @unique
+  title       String
+  posterUrl   String?
+  overview    String?
+  year        Int?
+  rating      Float?
+  genres      String[] @default([])
+  runtime     Int?
+  content     String
+  contentHash String
+  embedding   Unsupported("vector(1536)")?
+  embeddingModel String?
+  embeddedContentHash String?
+  embeddedAt DateTime?
+  /// Updated explicitly after each successful TMDB sync.
+  syncedAt    DateTime @default(now())
+}
+
 model MovieGenre {
   id      Int    @id @default(autoincrement())
   genre   String

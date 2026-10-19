@@ -28,7 +28,7 @@ export function ThemeToggle() {
       aria-label="Dark theme"
       data-cy="theme-toggle"
       title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      className="size-11 shrink-0 rounded-full text-foreground hover:bg-foreground/10 aria-pressed:bg-transparent data-[state=on]:bg-transparent data-[state=on]:text-foreground"
+      className="size-9 shrink-0 rounded-full text-foreground hover:bg-foreground/10 aria-pressed:bg-transparent data-[state=on]:bg-transparent data-[state=on]:text-foreground sm:size-11"
     >
       {isDark ? <Sun aria-hidden="true" className="size-5" /> : <Moon aria-hidden="true" className="size-5" />}
     </Toggle>

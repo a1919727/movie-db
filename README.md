@@ -111,6 +111,52 @@ The project expects environment variables for the frontend and backend services.
 - `CORS_ORIGIN`
 - Cloudinary configuration
 
+## Sync Movie Documents for RAG
+
+The sync script imports 100 popular movies from TMDB into `MovieDocument` by default.
+It fetches movie details and credits, saves metadata for filtering, and builds text
+with a SHA-256 content hash for future embeddings. It does not generate embeddings yet.
+
+Configure `DATABASE_URL` and `TMDB_API_KEY` in `backend/.env`, then run:
+
+```bash
+cd backend
+npx prisma generate
+npm run sync:movies
+```
+
+The target database must already have the committed Prisma migrations applied.
+The script writes to the database specified by `DATABASE_URL`. When running from
+your computer against Railway, use the database's public connection URL.
+
+To sync a different number of movies or view the available options:
+
+```bash
+npm run sync:movies -- --count 20
+npm run sync:movies -- --help
+```
+
+Each movie is upserted using its unique `tmdbId`, so rerunning the script updates
+existing records and refreshes `syncedAt`. The requested count is the number processed
+in that run, not a limit on the total records in the table; TMDB's popular list changes
+over time. Ratings are stored separately from the retrieval text, so rating changes
+do not change `contentHash`. Movie data is fetched in English, matching the website.
+
+Requests run sequentially with a 15-second timeout each. If a request or database
+write fails, the script stops with a nonzero exit code and keeps completed writes.
+It also reports failure if TMDB cannot provide the requested number of unique movies.
+Rerun the command after resolving the error.
+
+Offline checks for the sync script:
+
+```bash
+npm run check:scripts
+npm run test:sync-movies
+```
+
+The data comes from TMDB's [popular movies](https://developer.themoviedb.org/reference/movie-popular-list)
+and [movie details](https://developer.themoviedb.org/reference/movie-details) endpoints.
+
 ## Cypress Testing
 
 Frontend E2E tests are written with Cypress and should be run from the `frontend` app.

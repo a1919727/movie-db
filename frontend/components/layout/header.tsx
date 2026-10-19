@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Pacifico } from "next/font/google";
 import { AuthControls } from "../auth/auth-controls";
+import { AiSearchDialog } from "./ai-search-dialog";
 import { NavLink } from "./nav-link";
 import { SearchForm } from "./search-form";
 import { ThemeToggle } from "./theme-toggle";
@@ -19,9 +20,9 @@ const navLinks = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur">
-      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 px-4 py-3 lg:grid-cols-[1fr_auto_1fr]">
+      <div className="mx-auto grid min-h-16 max-w-[1440px] grid-cols-[auto_1fr] items-center gap-x-2 gap-y-3 px-3 py-3 sm:gap-x-4 sm:px-4 lg:grid-cols-[1fr_auto_1fr]">
         {/* Logo */}
-        <Link href="/" className={`${pacifico.className} text-2xl`}>
+        <Link href="/" className={`${pacifico.className} text-xl sm:text-2xl`}>
           MovieDB
         </Link>
 
@@ -38,6 +39,7 @@ export function Header() {
 
         <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-end gap-1 sm:gap-2 lg:col-start-3">
           <SearchForm />
+          <AiSearchDialog />
           <ThemeToggle />
           <AuthControls />
         </div>
