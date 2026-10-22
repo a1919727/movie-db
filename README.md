@@ -72,49 +72,22 @@ flowchart LR
 
 ## RAG Movie Search
 
-AI search lets users describe a movie, mood, or story, such as "a sci-fi movie
-about time travel and family." It uses retrieval-augmented generation (RAG) to
-retrieve related movies from a local collection and generate a short recommendation
-reason for each result. Ordinary title search continues to query TMDB separately.
+Describe a movie, mood, or story to find related movies with AI-generated
+recommendation reasons. The RAG pipeline combines Gemini embeddings, pgvector
+retrieval, and Gemini text generation:
 
 ```mermaid
-flowchart TD
-    subgraph Preparation[Offline Data Preparation]
-        T[TMDB Popular Movies + Details + Credits] --> S[sync:movies]
-        S --> D[MovieDocument Metadata + Content Hash]
-        D --> E[generate:embeddings / Gemini]
-        E --> V[(PostgreSQL / pgvector / 1536 Dimensions)]
-    end
-    subgraph Search[Online AI Search]
-        Q[User Description] --> QE[Gemini Query Embedding]
-        QE --> R[Cosine-Distance Retrieval / Up to 10 Movies]
-        R --> G[Gemini Recommendation Reasons]
-        G --> U[Frontend Movie Cards]
-    end
-    V --> R
+flowchart LR
+    Q[User Description] --> E[Gemini Embedding]
+    E --> R[pgvector / Up to 10 Movies]
+    R --> G[Gemini Recommendation Reasons]
+    G --> U[Movie Cards]
 ```
 
-- **Prepare movie documents:** Sync English movie metadata from TMDB. The retrieval
-  text includes the title, year, genres, runtime, director, leading cast, and overview
-  when available. A SHA-256 content hash tracks changes.
-- **Generate embeddings:** Store normalized 1,536-dimensional Gemini embeddings in
-  `MovieDocument`. Generate only missing vectors or vectors whose model or source
-  content has changed. A hash check at write time prevents saving a vector for a
-  document that changed during generation.
-- **Retrieve candidates:** Embed the user's description and use pgvector cosine
-  distance to retrieve up to 10 movies. Only documents with the configured embedding
-  model and an up-to-date content hash are eligible.
-- **Generate reasons:** Send the query and retrieved metadata to Gemini. The prompt
-  instructs the model to use only this metadata and acknowledge uncertain matches.
-  JSON Schema and Zod validate the returned IDs, count, uniqueness, and reason length.
-  The backend attaches reasons to the original candidates in retrieval order.
-
-The collection is limited to movies that have been synced and successfully embedded.
-Recommendations use the current query and movie metadata; they do not use a user's
-favorites or viewing history. The current implementation has no similarity cutoff,
-strict year/runtime filters, or reranking step. Output validation constrains the
-candidate IDs and response format; the factual accuracy of reasons still needs
-evaluation.
+TMDB movie documents and 1,536-dimensional embeddings are prepared before searching.
+Only synced documents with current embeddings are searched. Gemini generates reasons
+from the retrieved metadata, and Zod validates the output. Ordinary title search
+queries TMDB directly.
 
 ## Design Preview
 
@@ -168,136 +141,34 @@ The project expects environment variables for the frontend and backend services.
 
 Additional backend settings for AI search:
 
-| Variable | Purpose | Default / fallback |
-| --- | --- | --- |
-| `GEMINI_API_KEY` | Gemini API access for embedding and generation | Falls back to `GOOGLE_API_KEY` |
-| `GEMINI_EMBEDDING_MODEL` | Embedding model supporting 1,536 output dimensions | Falls back to `EMBEDDING_MODEL`; no default model |
-| `GEMINI_GENERATION_MODEL` | Generation model supporting structured JSON output | Required; no default model |
-| `AI_SEARCH_RATE_LIMIT_MAX` | Maximum AI search requests per IP per window | `5` |
-| `AI_SEARCH_RATE_LIMIT_WINDOW_MS` | AI search rate-limit window in milliseconds | `60000` |
+- `GEMINI_API_KEY`
+- `GEMINI_EMBEDDING_MODEL` (supports 1,536 output dimensions)
+- `GEMINI_GENERATION_MODEL` (supports structured JSON output)
 
-Keep API keys in the backend environment. For local development, create `backend/.env`
-from [backend/.env.example](backend/.env.example) if it does not already exist.
-Set the model IDs to models available to your Gemini API key with the capabilities
-listed above.
+Create `backend/.env` from [backend/.env.example](backend/.env.example) if needed.
+Keep API keys in the backend and choose model IDs available to your Gemini API key.
 
 ## Set Up RAG Movie Search
 
-### 1. Prepare the database
-
-Use a PostgreSQL server with pgvector installed. Configure `DATABASE_URL` in
-`backend/.env`, then apply the committed migrations and generate the Prisma client:
+Use PostgreSQL with pgvector installed and a database user that can enable the
+`vector` extension. Configure `backend/.env` with the settings above, then run
+from the project root:
 
 ```bash
 cd backend
 npx prisma migrate deploy
 npx prisma generate
-```
-
-The migrations enable the `vector` extension and create the `MovieDocument` table
-with a `vector(1536)` column. The database user must be able to enable the extension.
-These commands and the data preparation scripts use the database selected by
-`DATABASE_URL`. When connecting from your computer to Railway, use the database's
-public connection URL.
-
-### 2. Sync movie documents
-
-Configure `TMDB_API_KEY`, then run from `backend/`:
-
-```bash
 npm run sync:movies
-```
-
-The script processes 100 popular movies by default. It fetches movie details and
-credits, saves metadata and retrieval text, and calculates the content hash.
-Embedding generation is a separate step.
-
-To sync a different number of movies or view the available options:
-
-```bash
-npm run sync:movies -- --count 20
-npm run sync:movies -- --help
-```
-
-Each movie is upserted using its unique `tmdbId`, so rerunning the script updates
-existing records and refreshes `syncedAt`. The requested count is the number processed
-in that run, not a limit on the total records in the table; TMDB's popular list changes
-over time. Ratings are stored separately from the retrieval text, so rating changes
-do not change `contentHash`. Movie data is fetched in English, matching the website.
-
-Requests run sequentially with a 15-second timeout each. If a request or database
-write fails, the script stops with a nonzero exit code and keeps completed writes.
-It also reports failure if TMDB cannot provide the requested number of unique movies.
-Rerun the command after resolving the error.
-
-The data comes from TMDB's [popular movies](https://developer.themoviedb.org/reference/movie-popular-list)
-and [movie details](https://developer.themoviedb.org/reference/movie-details) endpoints.
-
-### 3. Generate embeddings
-
-Configure the Gemini API key and embedding model, then run from `backend/`:
-
-```bash
 npm run generate:embeddings
 ```
 
-By default, the script selects up to 100 documents with missing or outdated vectors
-and waits 1,000 ms between documents. It records `embeddingModel`,
-`embeddedContentHash`, and `embeddedAt` alongside each vector.
+Sync imports 100 popular movies by default; embedding generation processes up to
+100 missing or outdated documents per run. Use `--count` and `--limit` respectively
+to change batch sizes. Rerun embedding generation when movie content or the
+embedding model changes; current vectors are skipped.
 
-To change the batch size or delay, or view the available options:
-
-```bash
-npm run generate:embeddings -- --limit 200 --delay-ms 1000
-npm run generate:embeddings -- --help
-```
-
-Repeat the command if more pending documents remain. Rerunning skips current
-vectors; changing the embedding model or retrieval text makes affected documents
-eligible for regeneration. Rating-only changes do not require new embeddings.
-Documents with invalid or oversized embedding input are skipped and reported;
-other errors stop the run and preserve completed writes.
-
-### 4. Run and try AI search
-
-Configure `GEMINI_GENERATION_MODEL` and start both applications with `npm run dev`
-from the project root. Open the AI movie search button in the header, enter a
-description, and select **Find movies**. The frontend navigates to
-`/search?mode=ai&query=...` and displays movie cards with English recommendation
-reasons. Movie detail pages require signing in.
-
-The backend endpoint is `GET /api/movies/search/semantic`. For example:
-
-```bash
-curl --get 'http://localhost:4000/api/movies/search/semantic' \
-  --data-urlencode 'query=A sci-fi movie about time travel and family'
-```
-
-The trimmed query must contain 3–500 characters and fit the embedding service's
-1,800-byte input limit, including any model-specific prefix. A successful response
-has a `results` array containing up to 10 movies with `tmdbId`, `title`, `posterUrl`,
-`overview`, `year`, `rating`, `genres`, `runtime`, and `reason`.
-
-| Status | Meaning |
-| --- | --- |
-| `400` | Invalid or oversized query |
-| `429` | AI search rate limit reached |
-| `503` / `NOT_CONFIGURED` | Missing embedding or generation configuration |
-| `503` / `INDEX_NOT_READY` | No current embeddings for the configured model; complete the preparation steps above |
-| `503` / `SEARCH_UNAVAILABLE` | Embedding or recommendation generation failed, timed out, or returned invalid output |
-| `500` / `SEARCH_FAILED` | Unexpected search or database failure |
-
-Embedding requests have a 12-second timeout and generation requests have a
-15-second timeout. If reason generation fails, the endpoint returns an error;
-it currently does not return the retrieved movies without reasons. The frontend
-currently shows `Not found` for both empty results and failed AI requests.
-
-To type-check the backend and data preparation scripts without making API requests
-or writing to the database, run from `backend/`:
-
-```bash
-npm run check:scripts
-```
+Start the app with `npm run dev` from the project root. Open **AI movie search**
+in the header, describe what you want to watch, and select **Find movies**.
 
 ## Cypress Testing
 
