@@ -77,11 +77,11 @@ recommendation reasons. The RAG pipeline combines Gemini embeddings, pgvector
 retrieval, and Gemini text generation:
 
 ```mermaid
-flowchart LR
-    Q[User Description] --> E[Gemini Embedding]
-    E --> R[pgvector / Up to 10 Movies]
-    R --> G[Gemini Recommendation Reasons]
-    G --> U[Movie Cards]
+flowchart TD
+    Q["User<br/>Description"] --> E["Gemini<br/>Query embedding"]
+    E --> R["pgvector<br/>Up to 10 movies"]
+    R --> G["Gemini<br/>Recommendation<br/>reasons"]
+    G --> U["Movie cards"]
 ```
 
 TMDB movie documents and 1,536-dimensional embeddings are prepared before searching.
