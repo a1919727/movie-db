@@ -1,10 +1,11 @@
 # Movie Review Platform
 
-A full stack movie platform for discovering movies, browsing movie details, saving favorites, tracking watch list, and writing reviews.
+A full stack movie platform for discovering movies through title search and natural-language AI search, browsing movie details, saving favorites, tracking watched movies, and writing reviews.
 
 ## Features
 
 - Movie discovery and search with TMDB
+- RAG-powered AI movie search with semantic retrieval and generated recommendation reasons
 - Movie details, cast information, and watch-provider links
 - Authentication and profile sync with Clerk
 - Favorites, watched tracking, and reviews
@@ -18,6 +19,8 @@ A full stack movie platform for discovering movies, browsing movie details, savi
 - Express.js
 - Prisma
 - PostgreSQL
+- pgvector
+- Google Gemini API for embeddings and recommendation generation
 - Clerk
 - TMDB API
 - Cloudinary
@@ -44,6 +47,7 @@ backend/
   src/schemas/        Zod request validation schemas
   src/lib/            Shared backend utilities such as Prisma client
   prisma/             Database schema and migrations
+  scripts/            TMDB document sync and incremental embedding generation
 ```
 
 ## System Architecture
@@ -52,17 +56,38 @@ backend/
 flowchart LR
     F[Frontend<br/>Next.js<br/>Vercel]
     B[Backend API<br/>Node.js / Express<br/>Railway]
-    D[(PostgreSQL)]
+    D[(PostgreSQL + pgvector)]
     T[TMDB API]
     C[Clerk Authentication]
     M[Cloudinary]
+    G[Google Gemini API]
 
     F -->|REST API| B
     F <--> |Authentication| C
-    B -->|SQL| D
+    B -->|Business Data / Vector Search| D
     B -->|Movie Data| T
     B -->|Image Upload| M
+    B -->|Query Embeddings / Recommendation Reasons| G
 ```
+
+## RAG Movie Search
+
+Describe a movie, mood, or story to find related movies with AI-generated
+recommendation reasons. The RAG pipeline combines Gemini embeddings, pgvector
+retrieval, and Gemini text generation:
+
+```mermaid
+flowchart TD
+    Q["User<br/>Description"] --> E["Gemini<br/>Query embedding"]
+    E --> R["pgvector<br/>Up to 10 movies"]
+    R --> G["Gemini<br/>Recommendation<br/>reasons"]
+    G --> U["Movie cards"]
+```
+
+TMDB movie documents and 1,536-dimensional embeddings are prepared before searching.
+Only synced documents with current embeddings are searched. Gemini generates reasons
+from the retrieved metadata, and Zod validates the output. Ordinary title search
+queries TMDB directly.
 
 ## Design Preview
 
@@ -86,6 +111,9 @@ npm --prefix frontend install
 npm --prefix backend install
 ```
 
+Configure the environment variables below before starting. To enable AI search,
+also complete [Set Up RAG Movie Search](#set-up-rag-movie-search).
+
 Start both the frontend and backend together:
 
 ```bash
@@ -100,7 +128,7 @@ The project expects environment variables for the frontend and backend services.
 
 ### Frontend
 
-- `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_API_BASE_URL` (for local development: `http://localhost:4000/api`)
 - Clerk public configuration
 
 ### Backend
@@ -111,51 +139,36 @@ The project expects environment variables for the frontend and backend services.
 - `CORS_ORIGIN`
 - Cloudinary configuration
 
-## Sync Movie Documents for RAG
+Additional backend settings for AI search:
 
-The sync script imports 100 popular movies from TMDB into `MovieDocument` by default.
-It fetches movie details and credits, saves metadata for filtering, and builds text
-with a SHA-256 content hash for future embeddings. It does not generate embeddings yet.
+- `GEMINI_API_KEY`
+- `GEMINI_EMBEDDING_MODEL` (supports 1,536 output dimensions)
+- `GEMINI_GENERATION_MODEL` (supports structured JSON output)
 
-Configure `DATABASE_URL` and `TMDB_API_KEY` in `backend/.env`, then run:
+Create `backend/.env` from [backend/.env.example](backend/.env.example) if needed.
+Keep API keys in the backend and choose model IDs available to your Gemini API key.
+
+## Set Up RAG Movie Search
+
+Use PostgreSQL with pgvector installed and a database user that can enable the
+`vector` extension. Configure `backend/.env` with the settings above, then run
+from the project root:
 
 ```bash
 cd backend
+npx prisma migrate deploy
 npx prisma generate
 npm run sync:movies
+npm run generate:embeddings
 ```
 
-The target database must already have the committed Prisma migrations applied.
-The script writes to the database specified by `DATABASE_URL`. When running from
-your computer against Railway, use the database's public connection URL.
+Sync imports 100 popular movies by default; embedding generation processes up to
+100 missing or outdated documents per run. Use `--count` and `--limit` respectively
+to change batch sizes. Rerun embedding generation when movie content or the
+embedding model changes; current vectors are skipped.
 
-To sync a different number of movies or view the available options:
-
-```bash
-npm run sync:movies -- --count 20
-npm run sync:movies -- --help
-```
-
-Each movie is upserted using its unique `tmdbId`, so rerunning the script updates
-existing records and refreshes `syncedAt`. The requested count is the number processed
-in that run, not a limit on the total records in the table; TMDB's popular list changes
-over time. Ratings are stored separately from the retrieval text, so rating changes
-do not change `contentHash`. Movie data is fetched in English, matching the website.
-
-Requests run sequentially with a 15-second timeout each. If a request or database
-write fails, the script stops with a nonzero exit code and keeps completed writes.
-It also reports failure if TMDB cannot provide the requested number of unique movies.
-Rerun the command after resolving the error.
-
-Offline checks for the sync script:
-
-```bash
-npm run check:scripts
-npm run test:sync-movies
-```
-
-The data comes from TMDB's [popular movies](https://developer.themoviedb.org/reference/movie-popular-list)
-and [movie details](https://developer.themoviedb.org/reference/movie-details) endpoints.
+Start the app with `npm run dev` from the project root. Open **AI movie search**
+in the header, describe what you want to watch, and select **Find movies**.
 
 ## Cypress Testing
 
@@ -170,7 +183,7 @@ Example:
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
 CLERK_SECRET_KEY=sk_test_xxx
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
 ```
 
 If a test uses a fixed test account, add credentials in `frontend/cypress.env.json`.
